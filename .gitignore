@@ -134,3 +134,4 @@ monitor/filebeat/registry/
 
 # ENV
 .env
+.config
