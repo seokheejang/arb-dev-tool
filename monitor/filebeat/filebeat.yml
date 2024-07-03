@@ -1,0 +1,36 @@
+name: aws-minimal-chain
+setup.ilm.enabled: false
+setup.template.enabled: true
+setup.template.overwrite: true
+setup.template.name: "${SERVICE_NAME}"
+setup.template.pattern: "${SERVICE_NAME}-*"
+
+filebeat.inputs:
+  - type: container
+    fields:
+      service_name: minimal-chain
+    paths:
+      - /var/lib/docker/containers/*/*.log
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - drop_event:
+      when:
+        not:
+          or:
+            - and:
+                - regexp:
+                    message: "^(ERR|WARN).*"
+                - not:
+                    regexp:
+                      message: "latest L1 block is old"
+            - regexp:
+                message: "Submitted transaction"
+            - regexp:
+                message: "Data poster transactions confirmed"
+
+output.elasticsearch:
+  hosts: ["${ELASTICSEARCH_HOST}"]
+  index: "${SERVICE_NAME}-%{+yyyy.MM.dd}"
