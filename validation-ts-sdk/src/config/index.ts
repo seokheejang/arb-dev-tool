@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+export * from '@src/config/path';
+
 export const ENV = {
   L1_HTTP_URL: String(process.env.L1_HTTP_URL || ''),
   L1_WS_URL: String(process.env.L1_WS_URL || ''),
