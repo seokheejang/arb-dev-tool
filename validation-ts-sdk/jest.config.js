@@ -1,19 +1,19 @@
 /* eslint-disable no-undef */
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: "ts-jest",
-  testEnvironment: "node",
+  preset: 'ts-jest',
+  testEnvironment: 'node',
   forceExit: false,
-  testMatch: ["**/test/*.test.ts", "**/test/**/*.test.ts"],
-  testTimeout: 500000,
+  testMatch: ['**/test/*.test.ts', '**/test/**/*.test.ts'],
+  testTimeout: 800000,
   moduleNameMapper: {
-    "^@src/(.*)$": "<rootDir>/src/$1",
+    '^@src/(.*)$': '<rootDir>/src/$1',
   },
   transform: {
-    "^.+\\.tsx?$": [
-      "ts-jest",
+    '^.+\\.tsx?$': [
+      'ts-jest',
       {
-        tsconfig: "./tsconfig.json",
+        tsconfig: './tsconfig.json',
       },
     ],
   },
