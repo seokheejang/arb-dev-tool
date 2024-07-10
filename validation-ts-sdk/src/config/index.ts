@@ -18,4 +18,6 @@ export const ENV = {
   L3_CHAIN_ID: Number(process.env.L3_CHAIN_ID || 0),
 
   DEV_PRIV_KEY: String(process.env.DEV_PRIV_KEY || ''),
+
+  TX_SIMULATOR_URL: String(process.env.TX_SIMULATOR_URL || ''),
 };
