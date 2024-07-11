@@ -14,9 +14,9 @@ export const parseRollupData = async (data: string) => {
     txList.push(...decodeL2Msgs(l2Msgs[i]));
   }
 
-  console.log(
-    `Get all ${txList.length} l2 transaction and ${l2Msgs.length} blocks in this batch, writing tx to`,
-  );
+  // console.log(
+  //   `Get all ${txList.length} l2 transaction and ${l2Msgs.length} blocks in this batch, writing tx to`,
+  // );
 
   return txList;
 };
