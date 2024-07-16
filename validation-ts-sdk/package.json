@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --forceExit"
+    "test": "jest --detectOpenHandles --forceExit",
+    "wallet": "ts-node -r tsconfig-paths/register ./src/wallet/cmd.ts"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +27,7 @@
     "dotenv": "^16.4.5",
     "ethereumjs-util": "^7.1.5",
     "ethers": "^5.7.2",
-    "rlp": "^3.0.0"
+    "rlp": "^3.0.0",
+    "tsconfig-paths": "^4.2.0"
   }
 }

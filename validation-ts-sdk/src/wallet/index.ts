@@ -28,3 +28,8 @@ export const generateWallet = (): string => {
   const wallet = ethers.Wallet.createRandom();
   return wallet.privateKey;
 };
+
+export const getAddressFromPrivkey = (privateKey: string): string => {
+  const wallet = new ethers.Wallet(privateKey);
+  return wallet.address;
+};
