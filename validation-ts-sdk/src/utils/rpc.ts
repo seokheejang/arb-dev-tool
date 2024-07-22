@@ -10,9 +10,9 @@ const postData = {
   jsonrpc: '2.0',
 };
 
-export const reqApiPost = async (url: string) => {
+export const reqApiPost = async (url: string, req?: any) => {
   try {
-    const { data } = await axios.post(url, {}, { headers });
+    const { data } = await axios.post(url, req, { headers });
     return data;
   } catch (error) {
     console.error(error);

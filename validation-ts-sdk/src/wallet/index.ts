@@ -33,3 +33,10 @@ export const getAddressFromPrivkey = (privateKey: string): string => {
   const wallet = new ethers.Wallet(privateKey);
   return wallet.address;
 };
+
+export const getAddressFromString = (name: string): string => {
+  const wallet = new ethers.Wallet(ethers.utils.sha256(ethers.utils.toUtf8Bytes(name)));
+  console.log('wallet.privateKey', wallet.privateKey);
+  console.log('wallet.address', wallet.address);
+  return wallet.address;
+};

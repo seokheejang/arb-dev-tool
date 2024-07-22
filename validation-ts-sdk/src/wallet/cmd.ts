@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { getAddressFromPrivkey } from '@src/wallet';
+import { getAddressFromPrivkey, getAddressFromString } from '@src/wallet';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -11,13 +11,14 @@ async function main() {
 
   const privateKey = args[1];
 
-  if (!ethers.utils.isHexString(privateKey, 32)) {
-    console.error('Invalid private key');
-    process.exit(1);
-  }
+  // if (!ethers.utils.isHexString(privateKey, 32)) {
+  //   console.error('Invalid private key');
+  //   process.exit(1);
+  // }
 
   try {
     const address = getAddressFromPrivkey(privateKey);
+    // const address = getAddressFromString(privateKey);
     console.log('Address:', address);
   } catch (error) {
     console.error('Error:', error);
