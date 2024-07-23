@@ -157,8 +157,6 @@ describe('2_STORY', () => {
       expect(true).toEqual(true);
     });
 
-    it('1.4 Advanced 테스트', async () => {});
-
     it('finish', async () => {
       await sleep(1000);
     });

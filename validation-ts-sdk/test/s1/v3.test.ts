@@ -143,7 +143,7 @@ describe('1_STORY', () => {
           ansi.Green
         }L2 블록에서 찾은 L3의 Txhash: ${findL3Tx}${ansi.reset}`,
       );
-      l2_ws_prov.destroy();
+      await l2_ws_prov.destroy();
       expect(l3TxHash).toEqual(findL3Tx);
     });
 
