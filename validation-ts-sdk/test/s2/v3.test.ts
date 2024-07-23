@@ -1,128 +1,182 @@
 import {
   ENV,
-  HttpProvider,
-  TypeHttpProvider,
-  Wallet,
   sleep,
-  WsProvider,
-  TypeWsProvider,
   ansi,
-  StaticJsonRpcProvider,
-  TypeStaticJsonRpcProvider,
+  reqApiPost,
+  TypeHttpProvider,
+  TypeWsProvider,
+  HttpProvider,
+  WsProvider,
+  parseCalldata,
+  parseRollupData,
 } from '@src/index';
-import net from 'net';
-const { URL } = require('url');
 
 describe('2_STORY', () => {
-  let l3_prov: TypeStaticJsonRpcProvider;
-  let l3_fn_ws_prov: TypeWsProvider;
+  let api_url: string;
   let l3_fn_prov: TypeHttpProvider;
-  let dev_key: string;
-  let devWallet: Wallet;
+  let l2_ws_prov: TypeWsProvider;
+  let l2_prov: TypeHttpProvider;
 
   beforeAll(async () => {
-    dev_key = ENV.DEV_PRIV_KEY;
-    l3_prov = new StaticJsonRpcProvider(ENV.L3_HTTP_URL, 3000).prov;
-    l3_fn_ws_prov = new WsProvider(ENV.L3_FN_WS_URL).prov;
+    api_url = ENV.TX_SIMULATOR_URL;
     l3_fn_prov = new HttpProvider(ENV.L3_FN_HTTP_URL).prov;
-    devWallet = new Wallet(dev_key, l3_fn_prov);
+    l2_ws_prov = new WsProvider(ENV.L2_WS_URL).prov;
+    l2_prov = new HttpProvider(ENV.L2_HTTP_URL).prov;
   });
 
-  afterAll(async () => {
-    await l3_fn_ws_prov.destroy();
-  });
+  describe('Tx Simulator 개발 (254)', () => {
+    console.log(`${ansi.Yellow}조회 방법 - Tx-Simulator Server API 조회${ansi.reset}`);
+    const fromAddr = '0x07141f015eF4dd2077951aF88203d9C6fB470BB3';
+    const toAddr = '0x0414AAC259bE3474Ec1789Da23b6cE3836B0fEC8';
 
-  describe('Layer3 Full-Node Build (252)', () => {
-    console.log(
-      `${ansi.Yellow}조회 방법 - ethers.js(5.7.2) Http JsonRpcProvider로 api method 조회 (eth_chainId, eth_getBlock, eth_getTransaction...)${ansi.reset}`,
-    );
-    it('3.1 full-node URL로 http 및 ws 접속이 되어야 한다.', async () => {
-      const l3ChainId = (await l3_fn_prov.getNetwork()).chainId;
-      console.log(
-        `3.1 full-node URL로 http 및 ws 접속이 되어야 한다. \n  예상 결과 - L3 Chain ID: ${ENV.L3_CHAIN_ID} \n  실제 결과 - L3 Chain ID: ${ansi.Green}${l3ChainId}${ansi.reset}`,
-      );
-      expect(l3ChainId).toEqual(ENV.L3_CHAIN_ID);
-    });
+    let res_l3Txs: any[] = [];
+    let l2RollupTxs: string[] = [];
+    let finalCnt = 0;
+    let rollupTx: any;
+    let parsedL2CallData: any;
+    let parsedL3CallData: any;
+    let originL3txs: any[] = [];
 
-    it('3.2 sequencer node URL로는 http 및 ws 접속이 되지 않아야 한다.', async () => {
-      try {
-        const l3ChainId = await l3_prov.getNetwork();
-        console.log(
-          `3.2 sequencer node URL로는 http 및 ws 접속이 되지 않아야 한다. \n  예상 결과 - L3 Chain ID: ${ENV.L3_CHAIN_ID} \n  실제 결과 - L3 Chain ID: ${ansi.Green}${l3ChainId.chainId}${ansi.reset}`,
-        );
-        // This line should not be reached if the network detection fails
-        expect(true).toBe(false);
-      } catch (error: any) {
-        console.log(
-          `3.2 sequencer node URL로는 http 및 ws 접속이 되지 않아야 한다. \n  예상 결과 - could not detect network \n  실제 결과 - ${ansi.Red}${error.message}${ansi.reset}`,
-        );
-        expect(error.message).toMatch(/could not detect network/);
-      }
-    });
-
-    it('3.3 block 동기화가 정상적으로 이루어져있어야 한다.', async () => {
-      const url = new URL(ENV.L3_WS_FEED_URL);
-      const host = url.hostname;
-      const port = url.port;
-      const client = new net.Socket();
-      let connected = false;
-
-      const result = await new Promise((resolve, reject) => {
-        client.connect(port, host, () => {
-          connected = true;
-          client.end();
-          resolve(true);
-        });
-        client.on('error', err => {
-          client.end();
-          if (!connected) {
-            reject(new Error(`Failed to connect to ${host}:${port} - ${err.message}`));
-          }
-        });
-        client.on('close', () => {
-          if (connected) {
-            resolve(true);
-          } else {
-            reject(new Error(`Failed to connect to ${host}:${port}`));
+    it('3.1 Advanced Test 2', async () => {
+      const beforeBlockPromise = new Promise((resolve, reject) => {
+        l2_ws_prov.on('block', async (blockNumber: number) => {
+          try {
+            console.log(
+              `Rollup Tx Searching ... L2 new block! ${ansi.BrightWhite}${blockNumber}${ansi.reset}, finded L3 tx: ${ansi.Yellow}${finalCnt}${ansi.reset} / ${ansi.BrightYellow}${res_l3Txs.length}${ansi.reset}`,
+            );
+            if (finalCnt != 0 && finalCnt >= res_l3Txs.length) {
+              resolve(true);
+            }
+            const block = await l2_prov.getBlock(blockNumber);
+            const txs = block.transactions;
+            if (txs.length > 0) {
+              for (const tx of txs) {
+                rollupTx = await l2_prov.getTransaction(tx);
+                if (rollupTx.data.startsWith('0x8f111f3c')) {
+                  l2RollupTxs.push(tx);
+                  parsedL2CallData = await parseCalldata(rollupTx.data);
+                  const callData = parsedL2CallData?.params['data(bytes)'];
+                  parsedL3CallData = await parseRollupData(callData.substring(2));
+                  for (const tx of parsedL3CallData) {
+                    originL3txs.push(tx.hash);
+                    console.log(
+                      `Block(${blockNumber}) - 🎣 GETCHA Tx! ${ansi.Blue}${tx.hash}${ansi.reset}, ${ansi.BrightCyan}${tx.nonce}${ansi.reset}`,
+                    );
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            reject(error);
           }
         });
       });
-      console.log(
-        `3.3 block 동기화가 정상적으로 이루어져있어야 한다. L3 Feed Port 접속 확인. \n  예상 결과 - client connect {host}:{port}: true \n  실제 결과 - client connect ${host}:${port}: ${ansi.Green}${result}${ansi.reset}`,
+
+      const res_erc20_deploy = await reqApiPost(`${api_url}/erc20/deploy`);
+      const res_erc20_ca = res_erc20_deploy.ca;
+      const res_transfer = await reqApiPost(`${api_url}/erc20/transfer`, {
+        ca: res_erc20_ca,
+        to: toAddr,
+        amount: '1',
+        tries: 5,
+      });
+      const res_approve = await reqApiPost(`${api_url}/erc20/approve`, {
+        ca: res_erc20_ca,
+        from: fromAddr,
+        spender: fromAddr,
+        amount: '1',
+      });
+      const res_transferFrom = await reqApiPost(`${api_url}/erc20/transferFrom`, {
+        ca: res_erc20_ca,
+        from: fromAddr,
+        to: toAddr,
+        amount: '1',
+        tries: 5,
+      });
+      const res_erc721_deploy = await reqApiPost(`${api_url}/erc721/deploy`);
+      const res_erc721_ca = res_erc721_deploy.ca;
+      const res_erc721_approve = await reqApiPost(`${api_url}/erc721/approve`, {
+        ca: res_erc721_ca,
+        spender: toAddr,
+        id: '1',
+      });
+      const res_erc721_transferFrom = await reqApiPost(`${api_url}/erc721/transferFrom`, {
+        ca: res_erc721_ca,
+        from: fromAddr,
+        to: toAddr,
+        id: '3',
+        tries: 2,
+      });
+      const res_erc1155_deploy = await reqApiPost(`${api_url}/erc1155/deploy`);
+      const res_erc1155_ca = res_erc1155_deploy.ca;
+      const res_setApprovalAll = await reqApiPost(`${api_url}/erc1155/setApprovalAll`, {
+        ca: res_erc1155_ca,
+        spender: toAddr,
+        approved: true,
+      });
+      const res_safeTransferFrom = await reqApiPost(`${api_url}/erc1155/safeTransferFrom`, {
+        ca: res_erc1155_ca,
+        from: fromAddr,
+        to: toAddr,
+        id: 5,
+        amount: '1',
+        tries: 3,
+      });
+      const res_safeBatchTransferFrom = await reqApiPost(
+        `${api_url}/erc1155/safeBatchTransferFrom`,
+        {
+          ca: res_erc1155_ca,
+          from: fromAddr,
+          to: toAddr,
+          ids: [6, 7, 8],
+          amounts: [1, 1, 1],
+          tries: 2,
+        },
       );
-      expect(result).toEqual(true);
-    });
 
-    it('3.4 (full node에서) 발행된 transaction이 sequencer로 즉시 전달되어야 한다.', async () => {
-      const bn = await l3_fn_prov.getBlockNumber();
-      const bn_before = await l3_fn_prov.getBlock(bn);
-      const devAddr = devWallet.w.address;
-      const sendTx = await devWallet.sendTransaction(devAddr, '0.01');
-      const txRes = await sendTx.wait();
-      const txHash = txRes.transactionHash;
-      const bn_lastest = await l3_fn_prov.getBlock(txRes.blockNumber);
+      res_l3Txs = [
+        ...[res_erc20_deploy.txHash],
+        ...res_transfer.txHash,
+        ...[res_approve.txHash],
+        ...res_transferFrom.txHash,
+        ...[res_erc721_deploy.txHash],
+        ...[res_erc721_approve.txHash],
+        ...res_erc721_transferFrom.txHash,
+        ...[res_erc1155_deploy.txHash],
+        ...[res_setApprovalAll.txHash],
+        ...res_safeTransferFrom.txHash,
+        ...[res_safeBatchTransferFrom.txHash],
+      ];
 
-      const sendTx2 = await devWallet.sendTransaction(devAddr, '0.01');
-      const txRes2 = await sendTx2.wait();
-      const txHash2 = txRes2.transactionHash;
-      const bn_lastest2 = await l3_fn_prov.getBlock(txRes2.blockNumber);
+      console.log('res total count:', res_l3Txs.length, res_l3Txs);
+      const afterBlockPromise = new Promise(async (resolve, reject) => {
+        try {
+          while (1) {
+            if (finalCnt >= res_l3Txs.length) {
+              resolve(true);
+            }
+            finalCnt = 0;
+            for (const tx of res_l3Txs) {
+              if (originL3txs.includes(tx)) {
+                finalCnt++;
+              }
+            }
+            await sleep(300);
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      await beforeBlockPromise;
+      await afterBlockPromise;
+
       console.log(
-        `3.4 (full node에서) 발행된 transaction이 sequencer로 즉시 전달되어야 한다. \n  예상 결과 - 1개 블록간 0~1초 차이 \n  실제 결과 - \n    before  BlockNumber: ${bn_before?.number}, Timestamp: ${bn_before?.timestamp} \n    Tx 발생: ${txHash}, 적힌 블록: ${txRes.blockNumber}\n    ${ansi.Green}lastest BlockNumber: ${bn_lastest?.number}, Timestamp: ${bn_lastest?.timestamp}${ansi.reset}\n    Tx 발생: ${txHash2}, 적힌 블록: ${txRes2.blockNumber}\n    ${ansi.Blue}lastest BlockNumber: ${bn_lastest2?.number}, Timestamp: ${bn_lastest2?.timestamp}${ansi.reset}`,
+        `Done - Generate L3 Txs / Find Txs in L2 Rollup data: ${ansi.BrightGreen}${res_l3Txs.length}${ansi.reset} / ${ansi.BrightGreen}${finalCnt}${ansi.reset}`,
       );
-      expect(bn_lastest.number).toBeGreaterThan(bn_before.number);
-    });
 
-    it('3.5 ~ 2.8 command', async () => {
-      const l3fnurl = new URL(ENV.L3_FN_WS_URL);
-      const l3fnhost = l3fnurl.hostname;
-      const l3fnport = l3fnurl.port;
-      const l3url = new URL(ENV.L3_WS_URL);
-      const l3host = l3url.hostname;
-      const l3port = l3url.port;
-
-      console.log(
-        `3.5 - [l3node] ./minimal-node.bash script send-l3 --ethamount 0.1 --wait --l3url ws:/${l3host}:${l3port} \n   [full-node] ./minimal-node.bash script send-l3 --ethamount 0.1 --wait --l3url ws:/${l3fnhost}:${l3fnport} \n2.6 - eth.getTransaction \n2.7 - eth.getBlock \n2.8 - ./minimal-node.bash docker stop l3node_full_node \n      ./minimal-node.bash --run --detach --l3-node-sp`,
-      );
+      await l2_ws_prov.destroy();
+      expect(res_l3Txs.length).toEqual(finalCnt);
     });
 
     it('finish', async () => {

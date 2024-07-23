@@ -44,14 +44,14 @@ describe('2_STORY', () => {
       const res_deploy_txhash = res_Deploy.txHash;
       const triesCnt = 200;
       console.log(
-        `1.1 ERC-20\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${res_deploy_txhash}`,
+        `1.1 ERC-20\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${ansi.Blue}${res_deploy_txhash}${ansi.reset}`,
       );
 
       const beforeBlockPromise = new Promise((resolve, reject) => {
         l2_ws_prov.on('block', async (blockNumber: number) => {
           try {
             console.log(
-              `Rollup Tx Searching ... L2 new block! ${blockNumber}, finded L3 tx: ${ansi.Yellow}${finalCnt}${ansi.reset} / ${ansi.BrightYellow}${triesCnt}${ansi.reset}`,
+              `Rollup Tx Searching ... L2 new block! ${ansi.BrightWhite}${blockNumber}${ansi.reset}, finded L3 tx: ${ansi.Yellow}${finalCnt}${ansi.reset} / ${ansi.BrightYellow}${triesCnt}${ansi.reset}`,
             );
             if (finalCnt >= triesCnt) {
               resolve(true);
@@ -68,7 +68,9 @@ describe('2_STORY', () => {
                   parsedL3CallData = await parseRollupData(callData.substring(2));
                   for (const tx of parsedL3CallData) {
                     originL3txs.push(tx.hash);
-                    console.log(`Block(${blockNumber}) - GETCHA Tx! ${tx.hash}, ${tx.nonce}`);
+                    console.log(
+                      `Block(${blockNumber}) - 🎣 GETCHA Tx! ${ansi.Blue}${tx.hash}${ansi.reset}, ${ansi.BrightCyan}${tx.nonce}${ansi.reset}`,
+                    );
                   }
                 }
               }

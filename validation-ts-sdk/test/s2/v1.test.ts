@@ -30,22 +30,24 @@ describe('2_STORY', () => {
       const res_Deploy = await reqApiPost(`${req}/deploy`);
       const res_deploy_ca = res_Deploy.ca;
       const res_deploy_txhash = res_Deploy.txHash;
-      console.log(
-        `1.1 ERC-20\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${res_deploy_txhash}`,
-      );
       const erc20Inst = new ERC20(res_deploy_ca, l3_fn_prov).contract;
       const name = await erc20Inst.name();
       const symbol = await erc20Inst.symbol();
-      const decimals = await erc20Inst.decimals();
       const totalSupply = weiToEther(await erc20Inst.totalSupply());
-      console.log(`erc20Inst`, name, symbol, decimals, totalSupply);
+      console.log(
+        `1.1 ERC-20\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${ansi.Blue}${res_deploy_txhash}${ansi.reset} \n  name: ${name} \n  sybol: ${symbol} \n  totalSupply: ${totalSupply}`,
+      );
+      const before_transfer_balanceOf = weiToEther(await erc20Inst.balanceOf(toAddr));
       const res_transfer = await reqApiPost(`${req}/transfer`, {
         ca: res_deploy_ca,
         to: toAddr,
         amount: '1',
         tries: 5,
       });
-      console.log('res_transfer', res_transfer);
+      const after_transfer_balanceOf = weiToEther(await erc20Inst.balanceOf(toAddr));
+      console.log(
+        `  before token balanceOf: ${before_transfer_balanceOf} \n  transfer tx: [${ansi.Blue}${res_transfer.txHash}${ansi.reset}] \n  after token balanceOf: ${ansi.Green}${after_transfer_balanceOf}${ansi.reset}`,
+      );
       const before_allowance = weiToEther(await erc20Inst.allowance(fromAddr, fromAddr));
       const res_approve = await reqApiPost(`${req}/approve`, {
         ca: res_deploy_ca,
@@ -54,9 +56,9 @@ describe('2_STORY', () => {
         amount: '1',
       });
       const after_allowance = weiToEther(await erc20Inst.allowance(fromAddr, fromAddr));
-      console.log('res_approve', res_approve);
-      console.log('allowance', before_allowance, after_allowance);
-
+      console.log(
+        `  before allowance: ${before_allowance} \n  approve tx: ${ansi.Blue}${res_approve.txHash}${ansi.reset}  \n  after allowance: ${ansi.Green}${after_allowance}${ansi.reset}`,
+      );
       const before_balanceOf = weiToEther(await erc20Inst.balanceOf(toAddr));
       const res_transferFrom = await reqApiPost(`${req}/transferFrom`, {
         ca: res_deploy_ca,
@@ -66,8 +68,9 @@ describe('2_STORY', () => {
         tries: 5,
       });
       const after_balanceOf = weiToEther(await erc20Inst.balanceOf(toAddr));
-      console.log('res_transferFrom', res_transferFrom);
-      console.log('balanceOf', before_balanceOf, after_balanceOf);
+      console.log(
+        `  before token balanceOf: ${before_balanceOf} \n  transferFrom tx: [${ansi.Blue}${res_transferFrom.txHash}${ansi.reset}] \n  after token balanceOf: ${ansi.Green}${after_balanceOf}${ansi.reset}`,
+      );
       expect(true).toEqual(true);
     });
 
@@ -77,7 +80,7 @@ describe('2_STORY', () => {
       const res_deploy_ca = res_Deploy.ca;
       const res_deploy_txhash = res_Deploy.txHash;
       console.log(
-        `1.2 ERC-721\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${res_deploy_txhash}`,
+        `1.2 ERC-721\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${ansi.Blue}${res_deploy_txhash}${ansi.reset}`,
       );
       const erc721Inst = new ERC721(res_deploy_ca, l3_fn_prov).contract;
       const before_approved = await erc721Inst.getApproved(1);
@@ -87,9 +90,9 @@ describe('2_STORY', () => {
         id: '1',
       });
       const after_approved = await erc721Inst.getApproved(1);
-      console.log('res_approve', res_approve);
-      console.log('getApproved', before_approved, after_approved);
-
+      console.log(
+        `  before approved: ${before_approved} \n  approve tx: ${ansi.Blue}${res_approve.txHash}${ansi.reset}  \n  after approved: ${ansi.Green}${after_approved}${ansi.reset}`,
+      );
       const before_ownerOf = await erc721Inst.ownerOf(3);
       const res_transferFrom = await reqApiPost(`${req}/transferFrom`, {
         ca: res_deploy_ca,
@@ -99,8 +102,9 @@ describe('2_STORY', () => {
         tries: 2,
       });
       const after_ownerOf = await erc721Inst.ownerOf(3);
-      console.log('res_transferFrom', res_transferFrom);
-      console.log('ownerOf', before_ownerOf, after_ownerOf);
+      console.log(
+        `  before ownerOf: ${before_ownerOf} \n  transferFrom tx: [${ansi.Blue}${res_transferFrom.txHash}${ansi.reset}] \n  after ownerOf: ${ansi.Green}${after_ownerOf}${ansi.reset}`,
+      );
       expect(true).toEqual(true);
     });
 
@@ -110,7 +114,7 @@ describe('2_STORY', () => {
       const res_deploy_ca = res_Deploy.ca;
       const res_deploy_txhash = res_Deploy.txHash;
       console.log(
-        `1.3 ERC-1155\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${res_deploy_txhash}`,
+        `1.3 ERC-1155\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${ansi.Blue}${res_deploy_txhash}${ansi.reset}`,
       );
       const erc1155Inst = new ERC1155(res_deploy_ca, l3_fn_prov).contract;
       const before_ApprovedForAll = await erc1155Inst.isApprovedForAll(fromAddr, toAddr);
@@ -120,8 +124,9 @@ describe('2_STORY', () => {
         approved: true,
       });
       const after_ApprovedForAll = await erc1155Inst.isApprovedForAll(fromAddr, toAddr);
-      console.log('res_setApprovalAll', res_setApprovalAll);
-      console.log('ApprovedForAll', before_ApprovedForAll, after_ApprovedForAll);
+      console.log(
+        `  before ApprovedForAll: ${before_ApprovedForAll} \n  setApprovalAll tx: ${ansi.Blue}${res_setApprovalAll.txHash}  \n  after ApprovedForAll: ${ansi.Green}${after_ApprovedForAll}${ansi.reset}`,
+      );
 
       const before_balanceOf = weiToEther(await erc1155Inst.balanceOf(fromAddr, 5));
       const res_safeTransferFrom = await reqApiPost(`${req}/safeTransferFrom`, {
@@ -133,9 +138,9 @@ describe('2_STORY', () => {
         tries: 3,
       });
       const after_balanceOf = weiToEther(await erc1155Inst.balanceOf(fromAddr, 5));
-      console.log('res_safeTransferFrom', res_safeTransferFrom);
-      console.log('balanceOf', before_balanceOf, after_balanceOf);
-
+      console.log(
+        `  before token balanceOf: ${before_balanceOf} \n  safeTransferFrom tx: [${ansi.Blue}${res_safeTransferFrom.txHash}${ansi.reset}] \n  after token balanceOf: ${ansi.Green}${after_balanceOf}${ansi.reset}`,
+      );
       const before_balanceOfBatch = (
         await erc1155Inst.balanceOfBatch([fromAddr, fromAddr, fromAddr], [6, 7, 8])
       ).map((balance: any) => weiToEther(balance));
@@ -145,15 +150,15 @@ describe('2_STORY', () => {
         from: fromAddr,
         to: toAddr,
         ids: [6, 7, 8],
-        amounts: [1, 1, 1],
+        amounts: ['1000000000000000000', '1000000000000000000', '1000000000000000000'],
         tries: 2,
       });
       const after_balanceOfBatch = (
         await erc1155Inst.balanceOfBatch([fromAddr, fromAddr, fromAddr], [6, 7, 8])
       ).map((balance: any) => weiToEther(balance));
-
-      console.log('res_safeBatchTransferFrom', res_safeBatchTransferFrom);
-      console.log('balanceOfBatch', before_balanceOfBatch, after_balanceOfBatch);
+      console.log(
+        `  before balanceOfBatch: ${before_balanceOfBatch} \n  safeBatchTransferFrom tx: ${ansi.Blue}${res_safeBatchTransferFrom.txHash}${ansi.reset} \n  after balanceOfBatch: ${ansi.Green}${after_balanceOfBatch}${ansi.reset}`,
+      );
       expect(true).toEqual(true);
     });
 
