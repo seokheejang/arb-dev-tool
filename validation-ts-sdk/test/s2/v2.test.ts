@@ -42,7 +42,7 @@ describe('2_STORY', () => {
       const res_Deploy = await reqApiPost(`${req}/deploy`);
       const res_deploy_ca = res_Deploy.ca;
       const res_deploy_txhash = res_Deploy.txHash;
-      const triesCnt = 200;
+      const triesCnt = 100;
       console.log(
         `1.1 ERC-20\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${ansi.Blue}${res_deploy_txhash}${ansi.reset}`,
       );
@@ -51,7 +51,7 @@ describe('2_STORY', () => {
         l2_ws_prov.on('block', async (blockNumber: number) => {
           try {
             console.log(
-              `Rollup Tx Searching ... L2 new block! ${ansi.BrightWhite}${blockNumber}${ansi.reset}, finded L3 tx: ${ansi.Yellow}${finalCnt}${ansi.reset} / ${ansi.BrightYellow}${triesCnt}${ansi.reset}`,
+              `Rollup Tx Searching ... l2 block: ${blockNumber}, findtx: ${finalCnt}/${triesCnt}`,
             );
             if (finalCnt >= triesCnt) {
               resolve(true);
@@ -66,11 +66,13 @@ describe('2_STORY', () => {
                   parsedL2CallData = await parseCalldata(rollupTx.data);
                   const callData = parsedL2CallData?.params['data(bytes)'];
                   parsedL3CallData = await parseRollupData(callData.substring(2));
+                  console.log('parsedL2CallData', parsedL2CallData);
+                  console.log('parsedL3CallData', parsedL3CallData);
                   for (const tx of parsedL3CallData) {
                     originL3txs.push(tx.hash);
-                    console.log(
-                      `Block(${blockNumber}) - 🎣 GETCHA Tx! ${ansi.Blue}${tx.hash}${ansi.reset}, ${ansi.BrightCyan}${tx.nonce}${ansi.reset}`,
-                    );
+                    // console.log(
+                    //   `Block(${blockNumber}) - 🎣 GETCHA Tx! ${ansi.Blue}${tx.hash}${ansi.reset}, ${ansi.BrightCyan}${tx.nonce}${ansi.reset}`,
+                    // );
                   }
                 }
               }
@@ -88,7 +90,7 @@ describe('2_STORY', () => {
         tries: triesCnt,
       });
       res_l3Txs = res_transfer.txHash;
-      console.log('res_transfer count:', res_l3Txs.length, res_l3Txs);
+      console.log('Tx List from tx-simulator:', res_l3Txs.length);
       const afterBlockPromise = new Promise(async (resolve, reject) => {
         try {
           while (1) {
@@ -111,6 +113,7 @@ describe('2_STORY', () => {
       await beforeBlockPromise;
       await afterBlockPromise;
 
+      console.log('l2 rollup txs', originL3txs, 'l3 txs', res_l3Txs);
       console.log(
         `Done - Generate L3 Txs / Find Txs in L2 Rollup data: ${ansi.BrightGreen}${res_l3Txs.length}${ansi.reset} / ${ansi.BrightGreen}${finalCnt}${ansi.reset}`,
       );

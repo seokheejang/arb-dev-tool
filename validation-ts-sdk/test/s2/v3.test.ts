@@ -28,6 +28,7 @@ describe('2_STORY', () => {
     console.log(`${ansi.Yellow}조회 방법 - Tx-Simulator Server API 조회${ansi.reset}`);
     const fromAddr = '0x07141f015eF4dd2077951aF88203d9C6fB470BB3';
     const toAddr = '0x0414AAC259bE3474Ec1789Da23b6cE3836B0fEC8';
+    const spenderAddr = '0x2865C9f0E500844a78eC31fffAcc15E048C94029';
 
     let res_l3Txs: any[] = [];
     let l2RollupTxs: string[] = [];
@@ -42,7 +43,7 @@ describe('2_STORY', () => {
         l2_ws_prov.on('block', async (blockNumber: number) => {
           try {
             console.log(
-              `Rollup Tx Searching ... L2 new block! ${ansi.BrightWhite}${blockNumber}${ansi.reset}, finded L3 tx: ${ansi.Yellow}${finalCnt}${ansi.reset} / ${ansi.BrightYellow}${res_l3Txs.length}${ansi.reset}`,
+              `Rollup Tx Searching ... l2 block: ${blockNumber}, findtx: ${finalCnt}/${res_l3Txs.length}`,
             );
             if (finalCnt != 0 && finalCnt >= res_l3Txs.length) {
               resolve(true);
@@ -57,11 +58,13 @@ describe('2_STORY', () => {
                   parsedL2CallData = await parseCalldata(rollupTx.data);
                   const callData = parsedL2CallData?.params['data(bytes)'];
                   parsedL3CallData = await parseRollupData(callData.substring(2));
+                  console.log('parsedL2CallData', parsedL2CallData);
+                  console.log('parsedL3CallData', parsedL3CallData);
                   for (const tx of parsedL3CallData) {
                     originL3txs.push(tx.hash);
-                    console.log(
-                      `Block(${blockNumber}) - 🎣 GETCHA Tx! ${ansi.Blue}${tx.hash}${ansi.reset}, ${ansi.BrightCyan}${tx.nonce}${ansi.reset}`,
-                    );
+                    // console.log(
+                    //   `Block(${blockNumber}) - 🎣 GETCHA Tx! ${ansi.Blue}${tx.hash}${ansi.reset}, ${ansi.BrightCyan}${tx.nonce}${ansi.reset}`,
+                    // );
                   }
                 }
               }
@@ -83,29 +86,42 @@ describe('2_STORY', () => {
       const res_approve = await reqApiPost(`${api_url}/erc20/approve`, {
         ca: res_erc20_ca,
         from: fromAddr,
-        spender: fromAddr,
-        amount: '1',
+        spender: spenderAddr,
+        amount: '5',
       });
       const res_transferFrom = await reqApiPost(`${api_url}/erc20/transferFrom`, {
         ca: res_erc20_ca,
-        from: fromAddr,
+        from: spenderAddr,
         to: toAddr,
         amount: '1',
         tries: 5,
       });
       const res_erc721_deploy = await reqApiPost(`${api_url}/erc721/deploy`);
       const res_erc721_ca = res_erc721_deploy.ca;
-      const res_erc721_approve = await reqApiPost(`${api_url}/erc721/approve`, {
+      const res_mint0 = await reqApiPost(`${api_url}/erc721/mint`, {
         ca: res_erc721_ca,
-        spender: toAddr,
-        id: '1',
+        to: fromAddr,
       });
-      const res_erc721_transferFrom = await reqApiPost(`${api_url}/erc721/transferFrom`, {
+      const res_mint1 = await reqApiPost(`${api_url}/erc721/mint`, {
+        ca: res_erc721_ca,
+        to: fromAddr,
+      });
+      const res_erc721_transfer = await reqApiPost(`${api_url}/erc721/transfer`, {
         ca: res_erc721_ca,
         from: fromAddr,
         to: toAddr,
-        id: '3',
-        tries: 2,
+        id: '1',
+      });
+      const res_erc721_approve = await reqApiPost(`${api_url}/erc721/approve`, {
+        ca: res_erc721_ca,
+        spender: spenderAddr,
+        id: '0',
+      });
+      const res_erc721_transferFrom = await reqApiPost(`${api_url}/erc721/transferFrom`, {
+        ca: res_erc721_ca,
+        from: spenderAddr,
+        to: toAddr,
+        id: '0',
       });
       const res_erc1155_deploy = await reqApiPost(`${api_url}/erc1155/deploy`);
       const res_erc1155_ca = res_erc1155_deploy.ca;
@@ -120,7 +136,7 @@ describe('2_STORY', () => {
         to: toAddr,
         id: 5,
         amount: '1',
-        tries: 3,
+        tries: 1,
       });
       const res_safeBatchTransferFrom = await reqApiPost(
         `${api_url}/erc1155/safeBatchTransferFrom`,
@@ -130,7 +146,6 @@ describe('2_STORY', () => {
           to: toAddr,
           ids: [6, 7, 8],
           amounts: [1, 1, 1],
-          tries: 2,
         },
       );
 
@@ -140,6 +155,9 @@ describe('2_STORY', () => {
         ...[res_approve.txHash],
         ...res_transferFrom.txHash,
         ...[res_erc721_deploy.txHash],
+        ...[res_mint0.txHash],
+        ...[res_mint1.txHash],
+        ...res_erc721_transfer.txHash,
         ...[res_erc721_approve.txHash],
         ...res_erc721_transferFrom.txHash,
         ...[res_erc1155_deploy.txHash],
@@ -148,7 +166,7 @@ describe('2_STORY', () => {
         ...[res_safeBatchTransferFrom.txHash],
       ];
 
-      console.log('res total count:', res_l3Txs.length, res_l3Txs);
+      console.log('res total count:', res_l3Txs.length);
       const afterBlockPromise = new Promise(async (resolve, reject) => {
         try {
           while (1) {
@@ -171,6 +189,7 @@ describe('2_STORY', () => {
       await beforeBlockPromise;
       await afterBlockPromise;
 
+      console.log('l2 rollup txs', originL3txs, 'l3 txs', res_l3Txs);
       console.log(
         `Done - Generate L3 Txs / Find Txs in L2 Rollup data: ${ansi.BrightGreen}${res_l3Txs.length}${ansi.reset} / ${ansi.BrightGreen}${finalCnt}${ansi.reset}`,
       );
