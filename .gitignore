@@ -131,6 +131,7 @@ dist
 
 # Filebeat
 monitor/filebeat/registry/
+monitor/filebeat/docker-compose.yml
 
 # ENV
 .env
