@@ -1,36 +1,43 @@
-name: aws-minimal-chain
-setup.ilm.enabled: false
-setup.template.enabled: true
-setup.template.overwrite: true
-setup.template.name: "${SERVICE_NAME}"
-setup.template.pattern: "${SERVICE_NAME}-*"
+name: ${AGENT_NAME}
+setup:
+  ilm.enabled: false # index lifecycle management 사용 안함
+  template:
+    enabled: true # 사용자 정의 템플릿 사용 선언
+    name: ${TEMPLATE_NAME} # 탬플릿 이름
+    pattern: ${TEMPLATE_PATTERN} # index pattern
+    settings:
+      index.number_of_shards: 1 # primary shard 1개
+      index.number_of_replicas: 0 # replia shard 사용안함
 
 filebeat.inputs:
   - type: container
     fields:
-      service_name: minimal-chain
+      service_name: ${SERVICE_NODE_NAME}
     paths:
       - /var/lib/docker/containers/*/*.log
-
-processors:
-  - add_host_metadata: ~
-  - add_cloud_metadata: ~
-  - add_docker_metadata: ~
-  - drop_event:
-      when:
-        not:
-          or:
-            - and:
-                - regexp:
-                    message: "^(ERR|WARN).*"
-                - not:
-                    regexp:
-                      message: "latest L1 block is old"
-            - regexp:
-                message: "Submitted transaction"
-            - regexp:
-                message: "Data poster transactions confirmed"
+    processors:
+      - add_host_metadata: ~
+      - add_cloud_metadata: ~
+      - add_docker_metadata: ~
+      - drop_event:
+          when:
+            not:
+              or:
+                - and:
+                    - regexp:
+                        message: "^(ERR|WARN).*"
+                    - not:
+                        or:
+                          - regexp:
+                              message: "latest L1 block is old"
+                          - regexp:
+                              message: "Served eth_call"
+                # - regexp:
+                #     message: "Submitted transaction"
+                # - regexp:
+                #     message: "Data poster transactions confirmed"
 
 output.elasticsearch:
+  protocol: http
   hosts: ["${ELASTICSEARCH_HOST}"]
-  index: "${SERVICE_NAME}-%{+yyyy.MM.dd}"
+  index: "${AGENT_NAME}-%{+yyyy.MM.dd}"
