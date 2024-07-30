@@ -1,4 +1,3 @@
-version: "3"
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
@@ -10,6 +9,11 @@ services:
       - "${ENV_HOST_ADDR}:9300:9300"
     networks:
       - elastic-net
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: 3
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.11
@@ -20,6 +24,11 @@ services:
       - "${ENV_HOST_ADDR}:5601:5601"
     networks:
       - elastic-net
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: 3
 
 networks:
   elastic-net:
