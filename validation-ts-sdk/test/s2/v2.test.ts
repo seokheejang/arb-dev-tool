@@ -42,7 +42,7 @@ describe('2_STORY', () => {
       const res_Deploy = await reqApiPost(`${req}/deploy`);
       const res_deploy_ca = res_Deploy.ca;
       const res_deploy_txhash = res_Deploy.txHash;
-      const triesCnt = 100;
+      const triesCnt = 50;
       console.log(
         `1.1 ERC-20\n  Deployed CA: ${ansi.Green}${res_deploy_ca}${ansi.reset} \n  txHash: ${ansi.Blue}${res_deploy_txhash}${ansi.reset}`,
       );
@@ -51,7 +51,7 @@ describe('2_STORY', () => {
         l2_ws_prov.on('block', async (blockNumber: number) => {
           try {
             console.log(
-              `Rollup Tx Searching ... l2 block: ${blockNumber}, findtx: ${finalCnt}/${triesCnt}`,
+              `Rollup Tx Searching ... L2 block: ${ansi.BrightCyan}${blockNumber}${ansi.reset}, find tx: ${finalCnt}/${triesCnt}`,
             );
             if (finalCnt >= triesCnt) {
               resolve(true);
@@ -66,6 +66,8 @@ describe('2_STORY', () => {
                   parsedL2CallData = await parseCalldata(rollupTx.data);
                   const callData = parsedL2CallData?.params['data(bytes)'];
                   parsedL3CallData = await parseRollupData(callData.substring(2));
+                  console.log('block', block, '\nrollup tx:', tx);
+                  console.log('getTransaction()', rollupTx);
                   console.log('parsedL2CallData', parsedL2CallData);
                   console.log('parsedL3CallData', parsedL3CallData);
                   for (const tx of parsedL3CallData) {
@@ -90,7 +92,7 @@ describe('2_STORY', () => {
         tries: triesCnt,
       });
       res_l3Txs = res_transfer.txHash;
-      console.log('Tx List from tx-simulator:', res_l3Txs.length);
+      console.log('✅ Tx-simulator transaction 생성 완료:', res_l3Txs.length);
       const afterBlockPromise = new Promise(async (resolve, reject) => {
         try {
           while (1) {
@@ -113,9 +115,10 @@ describe('2_STORY', () => {
       await beforeBlockPromise;
       await afterBlockPromise;
 
-      console.log('l2 rollup txs', originL3txs, 'l3 txs', res_l3Txs);
+      res_l3Txs.reverse();
+      console.log('L2 rollup txs', originL3txs, 'L3 txs', res_l3Txs);
       console.log(
-        `Done - Generate L3 Txs / Find Txs in L2 Rollup data: ${ansi.BrightGreen}${res_l3Txs.length}${ansi.reset} / ${ansi.BrightGreen}${finalCnt}${ansi.reset}`,
+        `Done -  Find Txs in L2 Rollup / L3 Txs: ${ansi.BrightGreen}${res_l3Txs.length}${ansi.reset} / ${ansi.BrightGreen}${finalCnt}${ansi.reset}`,
       );
 
       await l2_ws_prov.destroy();

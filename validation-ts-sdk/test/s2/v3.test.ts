@@ -43,7 +43,7 @@ describe('2_STORY', () => {
         l2_ws_prov.on('block', async (blockNumber: number) => {
           try {
             console.log(
-              `Rollup Tx Searching ... l2 block: ${blockNumber}, findtx: ${finalCnt}/${res_l3Txs.length}`,
+              `Rollup Tx Searching ... L2 block: ${ansi.BrightCyan}${blockNumber}${ansi.reset}, find tx: ${finalCnt}/${res_l3Txs.length}`,
             );
             if (finalCnt != 0 && finalCnt >= res_l3Txs.length) {
               resolve(true);
@@ -58,6 +58,8 @@ describe('2_STORY', () => {
                   parsedL2CallData = await parseCalldata(rollupTx.data);
                   const callData = parsedL2CallData?.params['data(bytes)'];
                   parsedL3CallData = await parseRollupData(callData.substring(2));
+                  console.log('block', block, '\nrollup tx:', tx);
+                  console.log('getTransaction()', rollupTx);
                   console.log('parsedL2CallData', parsedL2CallData);
                   console.log('parsedL3CallData', parsedL3CallData);
                   for (const tx of parsedL3CallData) {
@@ -166,7 +168,7 @@ describe('2_STORY', () => {
         ...[res_safeBatchTransferFrom.txHash],
       ];
 
-      console.log('res total count:', res_l3Txs.length);
+      console.log('✅ Tx-simulator transaction 생성 완료:', res_l3Txs.length);
       const afterBlockPromise = new Promise(async (resolve, reject) => {
         try {
           while (1) {
@@ -189,9 +191,10 @@ describe('2_STORY', () => {
       await beforeBlockPromise;
       await afterBlockPromise;
 
-      console.log('l2 rollup txs', originL3txs, 'l3 txs', res_l3Txs);
+      res_l3Txs.reverse();
+      console.log('L2 rollup txs', originL3txs, 'L3 txs', res_l3Txs);
       console.log(
-        `Done - Generate L3 Txs / Find Txs in L2 Rollup data: ${ansi.BrightGreen}${res_l3Txs.length}${ansi.reset} / ${ansi.BrightGreen}${finalCnt}${ansi.reset}`,
+        `Done - Find Txs in L2 Rollup / L3 Txs : ${ansi.BrightGreen}${res_l3Txs.length}${ansi.reset} / ${ansi.BrightGreen}${finalCnt}${ansi.reset}`,
       );
 
       await l2_ws_prov.destroy();

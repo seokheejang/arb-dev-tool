@@ -96,14 +96,14 @@ describe('2_STORY', () => {
         ca: res_deploy_ca,
         to: fromAddr,
       });
-      const after_mint_ownerOf = await erc721Inst.ownerOf(0);
-      console.log(
-        `= Mint -> ${fromAddr}  \n  txhash: ${ansi.Blue}${res_mint0.txHash}${ansi.reset}  \n  before ownerOf: x \n  after ownerOf: ${ansi.Green}${after_mint_ownerOf}${ansi.reset}`,
-      );
       const res_mint1 = await reqApiPost(`${req}/mint`, {
         ca: res_deploy_ca,
         to: fromAddr,
       });
+      const after_mint_ownerOf = await erc721Inst.ownerOf(0);
+      console.log(
+        `= Mint 0, 1 -> ${fromAddr}  \n  txhash: ${ansi.Blue}[${res_mint0.txHash}, ${res_mint1.txHash}]${ansi.reset}  \n  before ownerOf: x \n  after ownerOf: ${ansi.Green}${after_mint_ownerOf}${ansi.reset}`,
+      );
       const before_mint1_ownerOf = await erc721Inst.ownerOf(1);
       const res_transfer = await reqApiPost(`${req}/transfer`, {
         ca: res_deploy_ca,
@@ -196,7 +196,7 @@ describe('2_STORY', () => {
         await erc1155Inst.balanceOfBatch([toAddr, toAddr, toAddr], [6, 7, 8])
       ).map((balance: any) => weiToEther(balance));
       console.log(
-        `= SafeBatchTransferFrom ${fromAddr} -> ${toAddr}, ids: [6, 7, 8], amounts: [1 ETH, 1 ETH, 1 ETH] \n  txhash: ${ansi.Blue}${res_safeBatchTransferFrom.txHash}${ansi.reset} \n  before balanceOfBatch: - ${fromAddr}: ${before_from_balanceOfBatch}, ${toAddr}: ${before_to_balanceOfBatch} \n  after balanceOfBatch: - ${fromAddr}: ${ansi.Green}${after_from_balanceOfBatch}${ansi.reset}, ${toAddr}: ${ansi.Green}${after_to_balanceOfBatch}${ansi.reset}`,
+        `= SafeBatchTransferFrom ${fromAddr} -> ${toAddr}, ids: [6, 7, 8], amounts: [1, 1, 1] \n  txhash: ${ansi.Blue}${res_safeBatchTransferFrom.txHash}${ansi.reset} \n  before balanceOfBatch: - ${fromAddr}: ${before_from_balanceOfBatch}, ${toAddr}: ${before_to_balanceOfBatch} \n  after balanceOfBatch: - ${fromAddr}: ${ansi.Green}${after_from_balanceOfBatch}${ansi.reset}, ${toAddr}: ${ansi.Green}${after_to_balanceOfBatch}${ansi.reset}`,
       );
       expect(true).toEqual(true);
     });
