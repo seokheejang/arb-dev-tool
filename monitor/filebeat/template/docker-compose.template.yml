@@ -8,8 +8,14 @@ services:
         max-size: "10m"
         max-file: "3"
     container_name: filebeat
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        "chown root:root /usr/share/filebeat/filebeat.yml && chmod 644 /usr/share/filebeat/filebeat.yml && filebeat -e",
+      ]
     volumes:
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:rw
       - ./registry:/usr/share/filebeat/data/registry
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers/*/*.log
