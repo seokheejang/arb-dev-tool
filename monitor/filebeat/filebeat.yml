@@ -38,6 +38,5 @@ filebeat.inputs:
                 #     message: "Data poster transactions confirmed"
 
 output.elasticsearch:
-  protocol: http
   hosts: ["${ELASTICSEARCH_HOST}"]
   index: "${AGENT_NAME}-%{+yyyy.MM.dd}"
