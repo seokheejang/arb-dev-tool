@@ -32,6 +32,10 @@ filebeat.inputs:
                               message: "latest L1 block is old"
                           - regexp:
                               message: "Served eth_call"
+                          - regexp:
+                              message: "Served eth_coinbase"
+                          - regexp:
+                              message: "finalized block not found"
                 # - regexp:
                 #     message: "Submitted transaction"
                 # - regexp:
