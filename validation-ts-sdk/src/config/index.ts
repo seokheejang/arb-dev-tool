@@ -23,4 +23,12 @@ export const ENV = {
   DEV_PRIV_KEY: String(process.env.DEV_PRIV_KEY || ''),
 
   TX_SIMULATOR_URL: String(process.env.TX_SIMULATOR_URL || ''),
+
+  L3_TEST_1_HTTP_URL: String(process.env.L3_TEST_1_HTTP_URL || ''),
+  L3_TEST_2_HTTP_URL: String(process.env.L3_TEST_2_HTTP_URL || ''),
+  L3_TEST_3_HTTP_URL: String(process.env.L3_TEST_3_HTTP_URL || ''),
+
+  L3_TEST_1_MNEMONIC: String(process.env.L3_TEST_1_MNEMONIC || ''),
+  L3_TEST_2_MNEMONIC: String(process.env.L3_TEST_2_MNEMONIC || ''),
+  L3_TEST_3_MNEMONIC: String(process.env.L3_TEST_3_MNEMONIC || ''),
 };

@@ -2,7 +2,7 @@ import {
   ENV,
   HttpProvider,
   TypeHttpProvider,
-  Wallet,
+  CustomWallet,
   sleep,
   WsProvider,
   TypeWsProvider,
@@ -16,14 +16,14 @@ describe('1_STORY', () => {
   let l2_prov: TypeHttpProvider;
   let l3_prov: TypeHttpProvider;
   let dev_key: string;
-  let devWallet: Wallet;
+  let devWallet: CustomWallet;
 
   beforeAll(async () => {
     dev_key = ENV.DEV_PRIV_KEY;
     l2_ws_prov = new WsProvider(ENV.L2_WS_URL).prov;
     l2_prov = new HttpProvider(ENV.L2_HTTP_URL).prov;
     l3_prov = new HttpProvider(ENV.L3_HTTP_URL).prov;
-    devWallet = new Wallet(dev_key, l3_prov);
+    devWallet = new CustomWallet(dev_key, l3_prov);
   });
 
   describe('Layer3 Sequencer Build (251)', () => {

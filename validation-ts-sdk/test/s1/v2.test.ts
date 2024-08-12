@@ -2,7 +2,7 @@ import {
   ENV,
   HttpProvider,
   TypeHttpProvider,
-  Wallet,
+  CustomWallet,
   sleep,
   TypeWsProvider,
   WsProvider,
@@ -16,14 +16,14 @@ describe('1_STORY', () => {
   let l1_prov: TypeHttpProvider;
   let l2_prov: TypeHttpProvider;
   let dev_key: string;
-  let devWallet: Wallet;
+  let devWallet: CustomWallet;
 
   beforeAll(async () => {
     dev_key = ENV.DEV_PRIV_KEY;
     l1_ws_prov = new WsProvider(ENV.L1_WS_URL).prov;
     l1_prov = new HttpProvider(ENV.L1_HTTP_URL).prov;
     l2_prov = new HttpProvider(ENV.L2_HTTP_URL).prov;
-    devWallet = new Wallet(dev_key, l2_prov);
+    devWallet = new CustomWallet(dev_key, l2_prov);
   });
 
   describe('Layer 2 구축 (244)', () => {

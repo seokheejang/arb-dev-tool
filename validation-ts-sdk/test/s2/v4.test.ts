@@ -2,7 +2,7 @@ import {
   ENV,
   HttpProvider,
   TypeHttpProvider,
-  Wallet,
+  CustomWallet,
   sleep,
   WsProvider,
   TypeWsProvider,
@@ -18,14 +18,14 @@ describe('2_STORY', () => {
   let l3_fn_ws_prov: TypeWsProvider;
   let l3_fn_prov: TypeHttpProvider;
   let dev_key: string;
-  let devWallet: Wallet;
+  let devWallet: CustomWallet;
 
   beforeAll(async () => {
     dev_key = ENV.DEV_PRIV_KEY;
     l3_prov = new StaticJsonRpcProvider(ENV.L3_HTTP_URL, 3000).prov;
     l3_fn_ws_prov = new WsProvider(ENV.L3_FN_WS_URL).prov;
     l3_fn_prov = new HttpProvider(ENV.L3_FN_HTTP_URL).prov;
-    devWallet = new Wallet(dev_key, l3_fn_prov);
+    devWallet = new CustomWallet(dev_key, l3_fn_prov);
   });
 
   afterAll(async () => {

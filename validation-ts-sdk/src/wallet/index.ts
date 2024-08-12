@@ -3,17 +3,18 @@ import { etherToWei } from '@src/utils';
 
 export type TypeWallet = ethers.Wallet;
 
-export class Wallet {
+export class CustomWallet {
   public w: ethers.Wallet;
-  constructor(key: string, provider: any) {
+  constructor(key: any, provider: any) {
     this.w = new ethers.Wallet(key, provider);
   }
 
-  async sendTransaction(toAddress: string, value: string) {
+  async sendTransaction(toAddress: string, value: string, data?: string) {
     const ether = etherToWei(value);
     const tx: ethers.providers.TransactionRequest = {
       to: toAddress,
       value: ether,
+      data: data,
       // @TODO: gas
       // gasLimit: gasLimit || undefined,
       // maxFeePerGas: maxFeePerGas,
@@ -32,6 +33,31 @@ export const generateWallet = (): string => {
 export const getAddressFromPrivkey = (privateKey: string): string => {
   const wallet = new ethers.Wallet(privateKey);
   return wallet.address;
+};
+
+export const generateMnemonicWallet = (): { mnemonic: string; privateKey: string } => {
+  const wallet = ethers.Wallet.createRandom();
+  return {
+    mnemonic: wallet.mnemonic.phrase,
+    privateKey: wallet.privateKey,
+  };
+};
+
+export const getMultiplePrivateKeys = (mnemonic: string, numberOfKeys: number = 10): string[] => {
+  if (!ethers.utils.isValidMnemonic(mnemonic)) {
+    throw new Error('Invalid mnemonic');
+  }
+
+  const hdNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+  const keys: string[] = [];
+  ``;
+
+  for (let i = 0; i < numberOfKeys; i++) {
+    const childNode = hdNode.derivePath(`m/44'/60'/0'/0/${i}`);
+    keys.push(childNode.privateKey);
+  }
+
+  return keys;
 };
 
 export const getAddressFromString = (name: string): string => {
