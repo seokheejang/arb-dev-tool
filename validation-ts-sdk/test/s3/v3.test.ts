@@ -45,8 +45,10 @@ describe('3_STORY', () => {
     it('1.1 --execution.sequencer.max-block-speed 0.25s / 5s', async () => {
       const count = 5;
 
+      // await l3_3_w.sendTransaction(l3_2_w.w.address, '0.01');
       for (let i = 1; i <= count; i++) {
         const tx = await l3_2_w.sendTransaction(l3_2_w.w.address, '0.01');
+        await tx.wait();
         const bn = (await l3_2_seq.getBlock(tx.blockHash as string)).number;
         console.log(
           `${ansi.Yellow}L3B tx${i}${ansi.reset} hash: ${
@@ -55,8 +57,10 @@ describe('3_STORY', () => {
         );
       }
 
+      // await l3_3_w.sendTransaction(l3_3_w.w.address, '0.01');
       for (let i = 1; i <= count; i++) {
         const tx = await l3_3_w.sendTransaction(l3_3_w.w.address, '0.01');
+        await tx.wait();
         const bn = (await l3_3_seq.getBlock(tx.blockHash as string)).number;
         console.log(
           `${ansi.Green}L3C tx${i}${ansi.reset} hash: ${

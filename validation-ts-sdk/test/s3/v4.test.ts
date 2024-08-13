@@ -42,6 +42,52 @@ describe('3_STORY', () => {
   });
 
   describe('보안 관련 (anti-ddos)', () => {
+    it('1.1 --execution.sequencer.max-revert-gas-reject 31000 assert', async () => {
+      const beforeBal = BigInt((await l3_2_seq.getBalance(l3_2_w.w.address)).toString());
+      const req = `${api_url}/storage/revertTx`;
+      const res = await reqApiPost(`${req}`, {
+        provider: ENV.L3_TEST_2_HTTP_URL,
+        privatekey: getMultiplePrivateKeys(ENV.L3_TEST_2_MNEMONIC)[0],
+        ca: '0x8B991a0092842F9F2F9ad3Ab43C097c60e3d58Db',
+        slots: 40,
+      });
+      const status = (await l3_2_seq.getTransactionReceipt(res.result)).status;
+      const afterBal = BigInt((await l3_2_seq.getBalance(l3_2_w.w.address)).toString());
+
+      console.log(
+        `L3B Node max-revert-gas-reject 디폴트 옵션값 (31000) 설정 시, 소모 가스 400000 이상 Tx 생성 결과\n` +
+          `  txhash: ${res.result}, status:  ${status}\n\n` +
+          `  ${
+            l3_2_w.w.address
+          } 주소의 Tx 실패 이전 잔액 : ${beforeBal}, Tx 실패 이후 잔액: ${afterBal}, 전후 차이: ${
+            ansi.Green
+          }${beforeBal - afterBal}${ansi.reset}`,
+      );
+    });
+
+    it('1.1 --execution.sequencer.max-revert-gas-reject 31000 assert', async () => {
+      const beforeBal = BigInt((await l3_2_seq.getBalance(l3_2_w.w.address)).toString());
+      const req = `${api_url}/storage/revertTx`;
+      const res = await reqApiPost(`${req}`, {
+        provider: ENV.L3_TEST_2_HTTP_URL,
+        privatekey: getMultiplePrivateKeys(ENV.L3_TEST_2_MNEMONIC)[0],
+        ca: '0x8B991a0092842F9F2F9ad3Ab43C097c60e3d58Db',
+        slots: 0,
+      });
+      const status = (await l3_2_seq.getTransactionReceipt(res.result)).status;
+      const afterBal = BigInt((await l3_2_seq.getBalance(l3_2_w.w.address)).toString());
+
+      console.log(
+        `L3B Node max-revert-gas-reject 디폴트 옵션값 (31000) 설정 시, 소모 가스 400000 미만 Tx 생성 결과\n` +
+          `  txhash: ${res.result}, status: ${status}\n\n` +
+          `  ${
+            l3_2_w.w.address
+          } 주소의 Tx 실패 이전 잔액 : ${beforeBal}, Tx 실패 이후 잔액: ${afterBal}, 전후 차이: ${
+            ansi.Green
+          }${beforeBal - afterBal}${ansi.reset}`,
+      );
+    });
+
     it('1.1 --execution.sequencer.max-revert-gas-reject 400000 assert', async () => {
       const beforeBal = BigInt((await l3_3_seq.getBalance(l3_3_w.w.address)).toString());
       const req = `${api_url}/storage/revertTx`;
@@ -52,13 +98,16 @@ describe('3_STORY', () => {
         slots: 40,
       });
       const status = (await l3_3_seq.getTransactionReceipt(res.result)).status;
-      console.log(`[Assert] result txhash: ${res.result}, status: ${status}`);
       const afterBal = BigInt((await l3_3_seq.getBalance(l3_3_w.w.address)).toString());
 
       console.log(
-        `[Assert] ${l3_3_w.w.address} balance before: ${beforeBal}, after: ${afterBal}, diff: ${
-          beforeBal - afterBal
-        }`,
+        `L3C Node max-revert-gas-reject 400000 옵션값 설정 시, 소모 가스 400000 이상 Tx 생성 결과\n` +
+          `  txhash: ${res.result}, status: ${status}\n\n` +
+          `  ${
+            l3_3_w.w.address
+          } 주소의 Tx 실패 이전 잔액 : ${beforeBal}, Tx 실패 이후 잔액: ${afterBal}, 전후 차이: ${
+            ansi.Green
+          }${beforeBal - afterBal}${ansi.reset}`,
       );
     });
 
@@ -71,13 +120,17 @@ describe('3_STORY', () => {
         ca: '0x655403cf10ee99ccfa3bc84cb3f79c76868d4efc',
         slots: 10,
       });
-      console.log('[Revert] result', res.result);
+
       const afterBal = BigInt((await l3_3_seq.getBalance(l3_3_w.w.address)).toString());
 
       console.log(
-        `[Revert] ${l3_3_w.w.address} balance before: ${beforeBal}, after: ${afterBal}, diff: ${
-          beforeBal - afterBal
-        }`,
+        `L3C Node max-revert-gas-reject 400000 옵션값 설정 시, 소모 가스 400000 미만 Tx 생성 결과\n` +
+          `  result: ${ansi.Red}${res.result}${ansi.reset}, status: X\n\n` +
+          `  ${
+            l3_3_w.w.address
+          } 주소의 Tx 실패 이전 잔액 : ${beforeBal}, Tx 실패 이후 잔액: ${afterBal}, 전후 차이: ${
+            ansi.Green
+          }${beforeBal - afterBal}${ansi.reset}`,
       );
     });
 
@@ -94,85 +147,81 @@ describe('3_STORY', () => {
       let startTime1: number;
       let endTime1 = 0;
       let errorMessage = '';
-      const beforeBlockPromise = new Promise((resolve, reject) => {
-        console.log('L2 Rollup Tx Searching ...');
-        l2_seq.on('block', async (blockNumber: number) => {
-          try {
-            if (finalCnt >= triesCnt) {
-              resolve(true);
-            }
-            const block = await l2_seq.getBlock(blockNumber);
-            const txs = block.transactions;
-            if (txs.length > 0) {
-              for (const tx of txs) {
-                rollupTx = await l2_seq.getTransaction(tx);
-                if (rollupTx.data !== '0x' && rollupTx.data.startsWith('0x8f111f3c')) {
-                  l2RollupTxs.push(tx);
-                  parsedL2CallData = await parseCalldata(rollupTx.data);
-                  const callData = parsedL2CallData?.params['data(bytes)'];
-                  parsedL3CallData = await parseRollupData(callData.substring(2));
-                  console.log('block', block, '\nrollup tx:', tx);
-                  console.log('getTransaction()', rollupTx);
-                  // console.log('parsedL2CallData', parsedL2CallData);
-                  // console.log('parsedL3CallData', parsedL3CallData);
-                  for (const tx of parsedL3CallData) {
-                    originL3txs.push(tx.hash);
-                  }
-                }
-              }
-            }
-          } catch (error) {
-            reject(error);
-          }
-        });
-      });
+      // const beforeBlockPromise = new Promise((resolve, reject) => {
+      //   console.log('L2 Rollup Tx Searching ...');
+      //   l2_seq.on('block', async (blockNumber: number) => {
+      //     try {
+      //       if (finalCnt >= triesCnt) {
+      //         resolve(true);
+      //       }
+      //       const block = await l2_seq.getBlock(blockNumber);
+      //       const txs = block.transactions;
+      //       if (txs.length > 0) {
+      //         for (const tx of txs) {
+      //           rollupTx = await l2_seq.getTransaction(tx);
+      //           if (rollupTx.data !== '0x' && rollupTx.data.startsWith('0x8f111f3c')) {
+      //             l2RollupTxs.push(tx);
+      //             parsedL2CallData = await parseCalldata(rollupTx.data);
+      //             const callData = parsedL2CallData?.params['data(bytes)'];
+      //             parsedL3CallData = await parseRollupData(callData.substring(2));
+      //             console.log('block', block, '\nrollup tx:', tx);
+      //             // console.log('getTransaction()', rollupTx);
+      //             // console.log('parsedL2CallData', parsedL2CallData);
+      //             // console.log('parsedL3CallData', parsedL3CallData);
+      //             for (const tx of parsedL3CallData) {
+      //               originL3txs.push(tx.hash);
+      //             }
+      //           }
+      //         }
+      //       }
+      //     } catch (error) {
+      //       reject(error);
+      //     }
+      //   });
+      // });
       startTime1 = Date.now();
       const tx1_data = '0x' + 'ff'.repeat(80000);
       const tx1 = await l3_1_w.sendTransaction(l3_1_w.w.address, '0.01', tx1_data);
-      console.log('L3 A Node 에서 30초 롤업 테스트를 위한 Tx 발생:', tx1.hash, getTime());
+      console.log('L3A Node 에서 Tx1 발생:', tx1.hash, getTime());
       res_l3Txs.push(tx1.hash);
       const tx2_data = '0x' + 'ff'.repeat(100000);
       let tx2: any;
 
       try {
+        console.log('L3A Node 에서 Tx2 발생:', getTime());
         tx2 = await l3_1_w.sendTransaction(l3_1_w.w.address, '0.01', tx2_data);
       } catch (error: any) {
         errorMessage =
           '{"jsonrpc":"2.0","id":53,"error":{"code":-32000,"message":"oversized data"}}';
       }
-      const afterBlockPromise = new Promise(async (resolve, reject) => {
-        try {
-          while (1) {
-            if (finalCnt >= triesCnt) {
-              resolve(true);
-            }
-            finalCnt = 0;
-            for (const tx of res_l3Txs) {
-              if (originL3txs.includes(tx)) {
-                if (tx === tx1.hash) endTime1 = Date.now();
-                finalCnt++;
-              }
-            }
-            await sleep(300);
-          }
-        } catch (error) {
-          reject(error);
-        }
-      });
+      // const afterBlockPromise = new Promise(async (resolve, reject) => {
+      //   try {
+      //     while (1) {
+      //       if (finalCnt >= triesCnt) {
+      //         resolve(true);
+      //       }
+      //       finalCnt = 0;
+      //       for (const tx of res_l3Txs) {
+      //         if (originL3txs.includes(tx)) {
+      //           if (tx === tx1.hash) endTime1 = Date.now();
+      //           finalCnt++;
+      //         }
+      //       }
+      //       await sleep(300);
+      //     }
+      //   } catch (error) {
+      //     reject(error);
+      //   }
+      // });
 
-      await beforeBlockPromise;
-      await afterBlockPromise;
+      // await beforeBlockPromise;
+      // await afterBlockPromise;
+      // const timeDifference1 = (endTime1 - startTime1) / 1000;
 
-      const timeDifference1 = (endTime1 - startTime1) / 1000;
       console.log(
-        'tx size (80000 / 85000) Time difference:',
-        timeDifference1,
-        'seconds \nL2 rollup txs: \n',
-        originL3txs,
-        'L3 txs',
-        res_l3Txs,
+        `L3A Node 옵션값 max-tx-data-size 85000 에서 Tx1 Size 80000 발생 성공: ${tx1.hash}\n` +
+          `L3A Node 옵션값 max-tx-data-size 85000 에서 Tx2 Size 100000 발생 실패: Error - ${ansi.Red}${errorMessage}${ansi.reset}\n`,
       );
-      console.log('tx size (100000 / 85000) error:', errorMessage);
       await l2_seq.destroy();
       expect(true).toEqual(true);
     });

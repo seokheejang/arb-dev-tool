@@ -45,7 +45,10 @@ describe('3_STORY', () => {
 
   describe('허가형 블록체인 개발 여부', () => {
     let errorMessage = '';
-    const whitelist = `0x851686a67ADE2d65a12d999c8ff0f077301f2952,0xcDbd82Fa99C3a0524A81C4A8345a9D4226c759C2,0x09E06f5ae83A6f19FFeB341Fc3D654b712a70298,0x3EaCb30f025630857aDffac9B2366F953eFE4F98`;
+    const whitelist = `0x851686a67ADE2d65a12d999c8ff0f077301f2952, 0xcDbd82Fa99C3a0524A81C4A8345a9D4226c759C2, 0x09E06f5ae83A6f19FFeB341Fc3D654b712a70298, 0x3EaCb30f025630857aDffac9B2366F953eFE4F98`;
+    console.log(
+      `허가형 블록체인 개발 여부\n  L3C WhiteList 주소 목록\n    [ ${ansi.Green}${whitelist}${ansi.reset} ]`,
+    );
     it('1.1 --execution.sequencer.sender-whitelist', async () => {
       const tx1 = await l3_3_w.sendTransaction(l3_3_w_bl.w.address, '0.001');
       const tx1_res = await l3_3_seq.getTransactionReceipt(tx1.hash);
@@ -58,7 +61,7 @@ describe('3_STORY', () => {
       }
 
       console.log(
-        `WhiteList Address: [${whitelist}]\n\nWhiteList Send Tx "${l3_3_w.w.address}" =💰=> "${l3_3_w_bl.w.address}" \n  TxHash: ${tx1.hash}, status: ${tx1_res.status} \n\nNon-WhiteList Send Tx "${l3_3_w_bl.w.address}" =💰=> "${l3_3_w.w.address}" \n  ${errorMessage}`,
+        `WhiteList Send Tx "${ansi.Green}${l3_3_w.w.address}${ansi.reset}" =💰=> "${ansi.Red}${l3_3_w_bl.w.address}${ansi.reset}" \n\n  TxHash: ${tx1.hash}, status: ${tx1_res.status} \n\n\nNon-WhiteList Send Tx "${ansi.Red}${l3_3_w_bl.w.address}${ansi.reset}" =💰=> "${ansi.Green}${l3_3_w.w.address}${ansi.reset}" \n\n  ${errorMessage}`,
       );
 
       expect(true).toEqual(true);
