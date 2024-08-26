@@ -31,4 +31,8 @@ export const ENV = {
   L3_TEST_1_MNEMONIC: String(process.env.L3_TEST_1_MNEMONIC || ''),
   L3_TEST_2_MNEMONIC: String(process.env.L3_TEST_2_MNEMONIC || ''),
   L3_TEST_3_MNEMONIC: String(process.env.L3_TEST_3_MNEMONIC || ''),
+
+  L3_TEST_1_KEY: String(process.env.L3_TEST_1_KEY || ''),
+  L3_TEST_2_KEY: String(process.env.L3_TEST_2_KEY || ''),
+  L3_TEST_3_KEY: String(process.env.L3_TEST_3_KEY || ''),
 };

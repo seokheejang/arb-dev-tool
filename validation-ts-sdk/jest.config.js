@@ -8,6 +8,7 @@ module.exports = {
   testTimeout: 800000,
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1',
+    '^@artifacts/(.*)$': '<rootDir>/artifacts/$1',
   },
   transform: {
     '^.+\\.tsx?$': [
