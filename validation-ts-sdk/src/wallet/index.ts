@@ -9,8 +9,8 @@ export class CustomWallet {
     this.w = new ethers.Wallet(key, provider);
   }
 
-  async sendTransaction(toAddress: string, value: string, data?: string) {
-    const ether = etherToWei(value);
+  async sendTransaction(toAddress: string, valueETH: string, data?: string) {
+    const ether = etherToWei(valueETH);
     const tx: ethers.providers.TransactionRequest = {
       to: toAddress,
       value: ether,

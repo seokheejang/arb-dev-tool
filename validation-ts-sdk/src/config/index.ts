@@ -35,4 +35,7 @@ export const ENV = {
   L3_TEST_1_KEY: String(process.env.L3_TEST_1_KEY || ''),
   L3_TEST_2_KEY: String(process.env.L3_TEST_2_KEY || ''),
   L3_TEST_3_KEY: String(process.env.L3_TEST_3_KEY || ''),
+
+  MINIMAL_L2_URL: String(process.env.MINIMAL_L2_URL || ''),
+  MINIMAL_L3_URL: String(process.env.MINIMAL_L3_URL || ''),
 };

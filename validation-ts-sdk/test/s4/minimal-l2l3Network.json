@@ -1,0 +1,51 @@
+{
+  "l1Network": {
+    "blockTime": 10,
+    "chainID": 412346,
+    "explorerUrl": "",
+    "isCustom": true,
+    "name": "EthLocal",
+    "partnerChainIDs": [
+      333333
+    ],
+    "isArbitrum": false
+  },
+  "l2Network": {
+    "chainID": 333333,
+    "confirmPeriodBlocks": 20,
+    "ethBridge": {
+      "bridge": "0xe0E99CB9BEa92e6e534c56a21382E82581DdA079",
+      "inbox": "0x5B61864CdDdF527B976B6EED82dec1c03680EA20",
+      "outbox": "0x79CA73178189b249F89ebe6933Cf1D9B3A667349",
+      "rollup": "0x5d146FEbAF6551FE29EffbdA78db7fddb16FDb48",
+      "sequencerInbox": "0x45968208968017938Ab4C6F4BF6c1EB06dF7F395"
+    },
+    "explorerUrl": "",
+    "isArbitrum": true,
+    "isCustom": true,
+    "name": "ArbLocal",
+    "partnerChainID": 412346,
+    "retryableLifetimeSeconds": 604800,
+    "nitroGenesisBlock": 0,
+    "nitroGenesisL1Block": 0,
+    "depositTimeout": 900000,
+    "tokenBridge": {
+      "l1CustomGateway": "0x554d974D0ee47ede9024275EA1A1aab273c2C4a2",
+      "l1ERC20Gateway": "0xE227b18A57204472240804eeFa7d005c630bc896",
+      "l1GatewayRouter": "0xdD4B56E9737E0358f2F92D21eaEE792bb8bfd550",
+      "l1MultiCall": "0xdD0518CDcb948ee4E5B2Ad45a93CA33eB37cCd71",
+      "l1ProxyAdmin": "0xa2992804bf7A7558a65cb9ee0780aAACC30a1D15",
+      "l1Weth": "0x0000000000000000000000000000000000000000",
+      "l1WethGateway": "0x0000000000000000000000000000000000000000",
+      "l2CustomGateway": "0x3de1F49Bb77F73243bc95BC5A95ff705045B23e6",
+      "l2ERC20Gateway": "0xd65a6D84844314A1ec81389daa3A126d49ABDDbD",
+      "l2GatewayRouter": "0x5C8aa2a1e86a284BE26C9CFA5daf57E5bc7208EA",
+      "l2Multicall": "0x5DEfd2d816fA4D4abE17B6Ba75505a8B43E3B8A6",
+      "l2ProxyAdmin": "0x127ADC41a8c95B8e15103cE7018A6e6280603F00",
+      "l2Weth": "0x0000000000000000000000000000000000000000",
+      "l2WethGateway": "0x0000000000000000000000000000000000000000"
+    }
+  },
+  "l1TokenBridgeCreator": "0x7969b1d5beA6ac112665cf47806032BD3cf56eD3",
+  "retryableSender": "0x9CD10aCfB47948D248fC1bBE993F5fA2A46438bA"
+}

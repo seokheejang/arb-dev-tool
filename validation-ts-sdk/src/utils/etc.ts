@@ -26,6 +26,10 @@ export function weiToGwei(wei: string | BigNumber): string {
   return ethers.utils.formatUnits(wei, 'gwei');
 }
 
+export function parseEther(ether: string): BigNumber {
+  return ethers.utils.parseEther(ether);
+}
+
 export function getTime() {
   const now = new Date(Date.now());
   const formattedTime = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });

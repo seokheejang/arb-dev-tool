@@ -11,7 +11,12 @@ import {
   CustomWallet,
   getTime,
   Rollup,
+  RollupAdminLogic,
+  UpgradeExecutor,
   ValidatorWalletCreator,
+  ValidatorWallet,
+  parseEther,
+  bigIntToString,
 } from '@src/index';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -28,13 +33,15 @@ describe('4_STORY', () => {
   let l3_1_w: CustomWallet;
   let l3_2_w: CustomWallet;
   let l3_3_w: CustomWallet;
+  let l2_1_w: CustomWallet;
+  let l2_3_w: CustomWallet;
   let rollupCA: string;
   let walletCreatorCA: string;
+  let upgradeExecutorCA: string;
   let rollupContract: Rollup;
+  let rollupAdminContract: RollupAdminLogic;
+  let upgradeContract: UpgradeExecutor;
   let validatorWalletCreator: any;
-  let doneNodeCreated = false;
-  let doneNodeConfirmed = false;
-  let doneNodeRejected = false;
 
   // const l3_1_scw = '0xfCef70A74e0CEBbD5b3089Dc798D30783cBBD508';
   // const l3_2_scw = '0x9d3E2cD97A78F191f3c691EDd3EafBe651fF7681';
@@ -43,6 +50,10 @@ describe('4_STORY', () => {
   let seqscwAddr: string;
   let v1scwAddr: string;
   let v2scwAddr: string;
+  let v2scw: ValidatorWallet;
+  let doneNodeCreated = false;
+  let doneNodeConfirmed = false;
+  let doneNodeRejected = false;
 
   beforeAll(async () => {
     api_url = ENV.TX_SIMULATOR_URL;
@@ -53,6 +64,8 @@ describe('4_STORY', () => {
     l3_1_w = new CustomWallet(ENV.L3_TEST_1_KEY, l3_1_seq);
     l3_2_w = new CustomWallet(ENV.L3_TEST_2_KEY, l3_2_seq);
     l3_3_w = new CustomWallet(ENV.L3_TEST_3_KEY, l3_3_seq);
+    l2_1_w = new CustomWallet(ENV.L3_TEST_1_KEY, l2_seq);
+    l2_3_w = new CustomWallet(ENV.L3_TEST_3_KEY, l2_seq);
 
     const l3ChainInfoPath = path.join(__dirname, 'l3_chain_info.json');
     try {
@@ -62,32 +75,40 @@ describe('4_STORY', () => {
         if (item.rollup) {
           rollupCA = item.rollup.rollup;
           walletCreatorCA = item.rollup['validator-wallet-creator'];
+          upgradeExecutorCA = item.rollup['upgrade-executor'];
         }
       });
     } catch (err) {
       console.error('Error reading or parsing JSON file:', err);
     }
     rollupContract = new Rollup(rollupCA, l2_seq);
+    rollupAdminContract = new RollupAdminLogic(rollupCA, l2_seq);
+    upgradeContract = new UpgradeExecutor(upgradeExecutorCA, l2_1_w.w);
     validatorWalletCreator = new ValidatorWalletCreator(walletCreatorCA, l2_seq);
     seqscwAddr = await validatorWalletCreator.getWallet(l3_1_w.w.address);
     v1scwAddr = await validatorWalletCreator.getWallet(l3_2_w.w.address);
     v2scwAddr = await validatorWalletCreator.getWallet(l3_3_w.w.address);
+    v2scw = new ValidatorWallet(v2scwAddr, l2_3_w.w);
   });
 
   afterEach(async () => {
     rollupContract.removeAllListeners();
   });
 
-  describe('ETH 기반 Admin Validator 구축', () => {
+  describe('Validator Whitelist Manager 개발', () => {
     it('1.1', async () => {
-      console.log(`환경 세팅\n` + `\tminimumAssertionPeriod = 50, confirmPeriodBlocks= 20`);
-
       const testAccountInfo = {
         s1: { name: 'sequencer', role: 'MakeNodes', address: seqscwAddr, eoa: l3_1_w.w.address },
         s2: { name: 'validator1', role: 'ResolveNodes', address: v1scwAddr, eoa: l3_2_w.w.address },
         s3: { name: 'validator2', role: 'ResolveNodes', address: v2scwAddr, eoa: l3_3_w.w.address },
       };
       await rollupContract.printStakeInfo(testAccountInfo, true);
+      const accounts = {
+        sequencer: seqscwAddr,
+        validator1: v1scwAddr,
+        validator2: v2scwAddr,
+      };
+      await rollupAdminContract.printIsValidator(accounts);
 
       const waitEvent = new Promise<boolean>(async (resolve, reject) => {
         try {
@@ -126,9 +147,26 @@ describe('4_STORY', () => {
         }
       });
 
+      console.log(`unset validator1`);
+      await upgradeContract.executeCall(
+        rollupCA,
+        rollupAdminContract.makeCalldata(v1scwAddr, false),
+      );
       const tx1 = await l3_1_w.sendTransaction(l3_1_w.w.address, '0.01');
       console.log('tx 생성', tx1.hash);
+
+      await rollupContract.printStakeInfo(testAccountInfo, true);
+      await rollupAdminContract.printIsValidator(accounts);
+
       await waitEvent;
+
+      console.log(`set validator1`);
+      await upgradeContract.executeCall(
+        rollupCA,
+        rollupAdminContract.makeCalldata(v1scwAddr, true),
+      );
+      await rollupAdminContract.printIsValidator(accounts);
+
       await l2_seq.destroy();
     });
 
