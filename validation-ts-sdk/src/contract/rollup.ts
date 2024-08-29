@@ -56,7 +56,7 @@ export class Rollup {
     const addrWidth = 42;
     const lsnWidth = 13;
     const asWidth = 13;
-    const fundWidth = 14;
+    const fundWidth = 13;
     const balWidth = 13;
 
     let result = '';

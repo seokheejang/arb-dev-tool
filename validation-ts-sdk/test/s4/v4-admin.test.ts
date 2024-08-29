@@ -94,9 +94,9 @@ describe('4_STORY', () => {
 
   describe('ETH 기반 Validator Library 개발', () => {
     it('1.1', async () => {
-      console.log('sequencer stake 출금');
+      console.log('admin validator stake 출금');
       const testAccountInfo = {
-        s1: { name: 'sequencer', role: 'MakeNodes', address: seqscwAddr, eoa: l3_1_w.w.address },
+        s1: { name: 'admin', role: 'MakeNodes', address: seqscwAddr, eoa: l3_1_w.w.address },
         s2: { name: 'validator1', role: 'ResolveNodes', address: v1scwAddr, eoa: l3_2_w.w.address },
         s3: { name: 'validator2', role: 'ResolveNodes', address: v2scwAddr, eoa: l3_3_w.w.address },
       };
@@ -111,10 +111,12 @@ describe('4_STORY', () => {
             'UserStakeUpdated',
             async (user: string, initialBalance: string, finalBalance: string) => {
               console.log(
-                `[EVENT][${getTime()}] 스테이킹 상황 update by user: ${user} from ${initialBalance} to ${finalBalance} }`,
+                `${ansi.BrightGreen}[Contract Event]${
+                  ansi.reset
+                }[${getTime()}] 스테이킹 상황 update by user: ${user} from ${initialBalance} to ${finalBalance} }`,
               );
-              await sleep(5000);
               await rollupContract.printStakeInfo(testAccountInfo, true);
+              await sleep(5000);
               if (execRefund == 0) {
                 try {
                   // console.log(`[${getTime()}] RollupUserLogic - withdrawStakerFunds Tx 발생`);
@@ -134,13 +136,18 @@ describe('4_STORY', () => {
             'UserWithdrawableFundsUpdated',
             async (user: string, initialBalance: string, finalBalance: string) => {
               console.log(
-                `[EVENT][${getTime()}] 출금가능금액 상황 by user: ${user} from ${initialBalance} to ${finalBalance} }`,
+                `${ansi.BrightGreen}[Contract Event]${
+                  ansi.reset
+                }[${getTime()}] 출금가능금액 상황 by user: ${user} from ${initialBalance} to ${finalBalance} }`,
               );
               await sleep(5000);
               if (execWithdraw == 1) {
                 const v1WalletContactBal = await l2_seq.getBalance(seqscwAddr);
                 try {
-                  console.log(`[${getTime()}] Validator Wallet - withdrawEth Tx 발생`);
+                  await rollupContract.printStakeInfo(testAccountInfo, true);
+                  console.log(
+                    `[${getTime()}] ${ansi.BrightGreen}withdraw eth${ansi.reset} Tx 발생`,
+                  );
                   const withdrawTx = await seqscw.withdrawETHFromWalletContract(
                     bigIntToString(v1WalletContactBal),
                     l2_1_w.w.address,
@@ -167,7 +174,7 @@ describe('4_STORY', () => {
 
       // withdraw stake
       try {
-        console.log(`[${getTime()}] RollupUserLogic - returnOldDeposit Tx 발생`);
+        console.log(`[${getTime()}] ${ansi.BrightGreen}return stake deposit${ansi.reset} Tx 발생`);
         const unstakeTx = await seqscw.unstake(seqscwAddr, rollupCA);
         await unstakeTx.wait();
       } catch (error) {

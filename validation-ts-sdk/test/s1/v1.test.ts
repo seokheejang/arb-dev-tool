@@ -77,7 +77,7 @@ describe('1_STORY', () => {
       const bn = txRes.blockNumber;
       const block = await l1_prov.getBlock(bn);
       console.log(
-        `1.5 node로 transaction 발행 시 block에 포함되어야 한다. \n  예상 결과 - 발생 시킨 Tx Hash: ${txHash} \n  실제 결과 - ${bn} 블록에 포함된 Txs: ${ansi.Green}${block.transactions}${ansi.reset}`,
+        `1.5 node로 transaction 발행 시 block에 포함되어야 한다. \n  예상 결과 - 발생 시킨 RBlock number: ${txHash} \n  실제 결과 - ${bn} 블록에 포함된 Txs: ${ansi.Green}${block.transactions}${ansi.reset}`,
       );
       expect(block.transactions.includes(txHash)).toEqual(true);
     });
