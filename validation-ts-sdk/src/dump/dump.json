@@ -11,7 +11,7 @@
     "enable": false,
     "end-block": "0",
     "mode": "random",
-    "room": 2,
+    "room": 4,
     "start-block": "0"
   },
   "chain": {
@@ -22,24 +22,24 @@
       "pathname": "",
       "private-key": ""
     },
-    "id": "333381",
-    "info-files": ["/config/l3_chain_info.json"],
+    "id": 2465002,
+    "info-files": ["/data/config/l3_chain_info.json"],
     "info-ipfs-download-path": "/tmp/",
     "info-ipfs-url": "",
     "info-json": "",
-    "name": "local"
+    "name": "itstg"
   },
   "conf": {
     "dump": false,
     "env-prefix": "",
-    "file": [],
+    "file": ["/data/config/l3archive_config_1.json"],
     "reload-interval": "0s",
     "s3": { "access-key": "", "bucket": "", "object-key": "", "region": "", "secret-key": "" },
     "string": ""
   },
   "execution": {
     "caching": {
-      "archive": false,
+      "archive": true,
       "block-age": "30m0s",
       "block-count": "128",
       "database-cache": 2048,
@@ -47,12 +47,13 @@
       "max-number-of-blocks-to-skip-state-saving": "0",
       "snapshot-cache": 400,
       "snapshot-restore-gas-limit": "300000000000",
+      "state-history": "345600",
+      "state-scheme": "hash",
       "stylus-lru-cache": "256",
       "trie-clean-cache": 600,
       "trie-dirty-cache": 1024,
       "trie-time-limit": "1h0m0s"
     },
-    "dangerous": { "reorg-to-block": -1 },
     "enable-prefetch-block": true,
     "forwarder": {
       "connection-timeout": "30s",
@@ -62,18 +63,23 @@
       "retry-interval": "100ms",
       "update-interval": "1s"
     },
-    "forwarding-target": "ws://3.38.112.13:3348",
+    "forwarding-target": "wss://it-stg-relayer.dknote.net",
     "parent-chain-reader": {
       "dangerous": { "wait-for-tx-approval-safe-poll": "0s" },
       "enable": true,
       "old-header-timeout": "5m0s",
       "poll-interval": "15s",
       "poll-only": false,
+      "poll-timeout": "5s",
       "subscribe-err-interval": "5m0s",
       "tx-timeout": "5m0s",
       "use-finality-data": true
     },
-    "recording-database": { "trie-clean-cache": 16, "trie-dirty-cache": 1024 },
+    "recording-database": {
+      "max-prepared": 1000,
+      "trie-clean-cache": 16,
+      "trie-dirty-cache": 1024
+    },
     "rpc": {
       "allow-method": [],
       "arbdebug": { "block-range-bound": "256", "timeout-queue-bound": "512" },
@@ -113,7 +119,13 @@
       "nonce-failure-cache-size": 1024,
       "queue-size": 1024,
       "queue-timeout": "12s",
-      "sender-whitelist": ""
+      "sender-whitelist": []
+    },
+    "stylus-target": {
+      "amd64": "x86_64-linux-unknown+sse4.2+lzcnt+bmi",
+      "arm64": "arm64-linux-unknown+neon",
+      "extra-archs": ["wavm"],
+      "host": ""
     },
     "sync-monitor": {
       "finalized-block-wait-for-block-validator": false,
@@ -123,7 +135,7 @@
     "tx-pre-checker": {
       "required-state-age": 2,
       "required-state-max-blocks": "4",
-      "strictness": "0"
+      "strictness": "20"
     }
   },
   "file-logging": {
@@ -139,9 +151,9 @@
   "graphql": { "corsdomain": [], "enable": false, "vhosts": ["localhost"] },
   "http": {
     "addr": "0.0.0.0",
-    "api": ["net", "web3", "arb", "debug", "eth"],
-    "corsdomain": ["*"],
-    "port": 3447,
+    "api": ["net", "web3", "eth", "arb"],
+    "corsdomain": "*",
+    "port": 8547,
     "rpcprefix": "",
     "server-timeouts": {
       "idle-timeout": "2m0s",
@@ -149,7 +161,7 @@
       "read-timeout": "30s",
       "write-timeout": "30s"
     },
-    "vhosts": ["*"]
+    "vhosts": "*"
   },
   "init": {
     "accounts-per-sync": "100000",
@@ -161,17 +173,21 @@
     "empty": true,
     "force": false,
     "import-file": "",
+    "import-wasm": false,
     "latest": "",
     "latest-base": "https://snapshot.arbitrum.foundation/",
     "prune": "",
     "prune-bloom-size": "2048",
-    "prune-threads": 2,
+    "prune-threads": 4,
     "prune-trie-clean-cache": 600,
-    "rebuild-local-wasm": true,
+    "rebuild-local-wasm": "auto",
     "recreate-missing-state-from": "0",
-    "reset-to-message": -1,
+    "reorg-to-batch": -1,
+    "reorg-to-block-batch": -1,
+    "reorg-to-message-batch": -1,
     "then-quit": false,
-    "url": "https://nw-l3-dev.s3.ap-northeast-2.amazonaws.com/prune/2024-11-15/pruned.tar.gz"
+    "url": "",
+    "validate-checksum": true
   },
   "ipc": { "path": "" },
   "log-level": "INFO",
@@ -180,12 +196,14 @@
   "metrics-server": { "addr": "127.0.0.1", "port": 6070, "update-interval": "3s" },
   "node": {
     "batch-poster": {
+      "check-batch-correctness": true,
       "compression-level": 11,
       "das-retention-period": "360h0m0s",
       "data-poster": {
         "allocate-mempool-balance": true,
-        "blob-tx-replacement-times": "5m,10m,30m,1h,4h,8h,16h,22h",
+        "blob-tx-replacement-times": "[5m0s,10m0s,30m0s,1h0m0s,4h0m0s,8h0m0s,16h0m0s,22h0m0s]",
         "dangerous": { "clear-dbstorage": false },
+        "disable-new-tx": false,
         "elapsed-time-base": "10m0s",
         "elapsed-time-importance": "10",
         "external-signer": {
@@ -204,7 +222,7 @@
         "max-mempool-transactions": "18",
         "max-mempool-weight": "18",
         "max-queued-transactions": 0,
-        "max-tip-cap-gwei": "5",
+        "max-tip-cap-gwei": "1.2",
         "min-blob-tx-tip-cap-gwei": "1",
         "min-tip-cap-gwei": "0.05",
         "nonce-rbf-soft-confs": "1",
@@ -213,7 +231,7 @@
           "fallback-verification-key": "",
           "signing-key": ""
         },
-        "replacement-times": "5m,10m,20m,30m,1h,2h,4h,6h,8h,12h,16h,18h,20h,22h",
+        "replacement-times": "[5m0s,10m0s,20m0s,30m0s,1h0m0s,2h0m0s,4h0m0s,6h0m0s,8h0m0s,12h0m0s,16h0m0s,18h0m0s,20h0m0s,22h0m0s]",
         "target-price-gwei": "60",
         "urgency-gwei": "2",
         "use-db-storage": true,
@@ -235,7 +253,7 @@
       "parent-chain-wallet": {
         "account": "",
         "only-create-key": false,
-        "password": "PASSWORD_NOT_SET",
+        "password": "",
         "pathname": "batch-poster-wallet",
         "private-key": ""
       },
@@ -250,29 +268,35 @@
         "refresh-duration": "10s"
       },
       "redis-url": "",
+      "reorg-resistance-margin": "10m0s",
       "use-access-lists": true,
       "wait-for-max-delay": false
     },
     "block-validator": {
+      "batch-cache-limit": "20",
       "current-module-root": "current",
       "dangerous": { "reset-block-validation": false },
       "enable": false,
       "failure-is-fatal": true,
-      "forward-blocks": "1024",
+      "forward-blocks": "128",
       "memory-free-limit": "default",
       "pending-upgrade-module-root": "latest",
-      "prerecorded-blocks": "4",
+      "prerecorded-blocks": "8",
+      "recording-iter-limit": "20",
       "redis-validation-client-config": {
         "create-streams": true,
         "name": "redis validation client",
         "producer-config": {
           "check-pending-interval": "1s",
+          "check-pending-items": 256,
           "check-result-interval": "5s",
           "enable-reproduce": true,
           "keepalive-timeout": "5m0s"
         },
         "redis-url": "",
-        "room": 2
+        "room": 2,
+        "stream-prefix": "",
+        "stylus-archs": ["wavm"]
       },
       "validation-poll": "1s",
       "validation-server": {
@@ -304,7 +328,10 @@
         "max-per-endpoint-stats": 20,
         "online-url-list": "",
         "online-url-list-fetch-interval": "1h0m0s",
-        "simple-explore-exploit-strategy": { "exploit-iterations": 1000, "explore-iterations": 20 },
+        "simple-explore-exploit-strategy": {
+          "exploit-iterations": "1000",
+          "explore-iterations": "20"
+        },
         "strategy": "simple-explore-exploit",
         "strategy-update-interval": "10s",
         "sync-to-storage": {
@@ -313,15 +340,16 @@
           "eager-lower-bound-block": "0",
           "ignore-write-errors": true,
           "parent-chain-blocks-per-read": "100",
-          "retention-period": "2562047h47m16.854775807s",
-          "state-dir": ""
+          "retention-period": "360h0m0s",
+          "state-dir": "",
+          "sync-expired-data": true
         },
         "urls": [],
         "wait-before-try-next": "2s"
       },
       "rpc-aggregator": {
         "assumed-honest": 0,
-        "backends": "",
+        "backends": null,
         "enable": false,
         "max-store-chunk-body-size": 524288
       },
@@ -342,7 +370,7 @@
         "require-feed-version": false,
         "secondary-url": [],
         "timeout": "20s",
-        "url": ["ws://3.38.112.13:9742"],
+        "url": "wss://it-stg-relayer-fd.dknote.net",
         "verify": {
           "accept-sequencer": true,
           "allowed-addresses": [],
@@ -350,7 +378,7 @@
         }
       },
       "output": {
-        "addr": "0.0.0.0",
+        "addr": "",
         "backlog": { "segment-limit": 240 },
         "client-delay": "0s",
         "client-timeout": "15s",
@@ -371,7 +399,7 @@
         "max-catchup": -1,
         "max-send-queue": 4096,
         "ping": "5s",
-        "port": "3652",
+        "port": 9642,
         "queue": 100,
         "read-timeout": "1s",
         "require-compression": false,
@@ -409,12 +437,14 @@
       "old-header-timeout": "5m0s",
       "poll-interval": "15s",
       "poll-only": false,
+      "poll-timeout": "5s",
       "subscribe-err-interval": "5m0s",
       "tx-timeout": "5m0s",
       "use-finality-data": true
     },
     "seq-coordinator": {
       "chosen-healthcheck-addr": "",
+      "delete-finalized-msgs": true,
       "enable": false,
       "handoff-timeout": "30s",
       "lockout-duration": "1m0s",
@@ -425,7 +455,7 @@
       "release-retries": 4,
       "retry-interval": "50ms",
       "safe-shutdown-delay": "5s",
-      "seq-num-duration": "24h0m0s",
+      "seq-num-duration": "240h0m0s",
       "signer": {
         "ecdsa": {
           "accept-sequencer": true,
@@ -449,8 +479,9 @@
       "dangerous": { "ignore-rollup-wasm-module-root": false, "without-block-validator": false },
       "data-poster": {
         "allocate-mempool-balance": true,
-        "blob-tx-replacement-times": "5m,10m,30m,1h,4h,8h,16h,22h",
+        "blob-tx-replacement-times": "[5m0s,10m0s,30m0s,1h0m0s,4h0m0s,8h0m0s,16h0m0s,22h0m0s]",
         "dangerous": { "clear-dbstorage": false },
+        "disable-new-tx": false,
         "elapsed-time-base": "10m0s",
         "elapsed-time-importance": "10",
         "external-signer": {
@@ -469,7 +500,7 @@
         "max-mempool-transactions": "1",
         "max-mempool-weight": "1",
         "max-queued-transactions": 0,
-        "max-tip-cap-gwei": "5",
+        "max-tip-cap-gwei": "1.2",
         "min-blob-tx-tip-cap-gwei": "1",
         "min-tip-cap-gwei": "0.05",
         "nonce-rbf-soft-confs": "1",
@@ -478,7 +509,7 @@
           "fallback-verification-key": "",
           "signing-key": ""
         },
-        "replacement-times": "5m,10m,20m,30m,1h,2h,4h,6h,8h,12h,16h,18h,20h,22h",
+        "replacement-times": "[5m0s,10m0s,20m0s,30m0s,1h0m0s,2h0m0s,4h0m0s,6h0m0s,8h0m0s,12h0m0s,16h0m0s,18h0m0s,20h0m0s,22h0m0s]",
         "target-price-gwei": "60",
         "urgency-gwei": "2",
         "use-db-storage": true,
@@ -487,14 +518,16 @@
       },
       "disable-challenge": false,
       "enable": false,
+      "enable-fast-confirmation": false,
       "extra-gas": "50000",
       "gas-refunder-address": "",
+      "log-query-batch-size": "0",
       "make-assertion-interval": "1h0m0s",
       "only-create-wallet-contract": false,
       "parent-chain-wallet": {
         "account": "",
         "only-create-key": false,
-        "password": "PASSWORD_NOT_SET",
+        "password": "",
         "pathname": "validator-wallet",
         "private-key": ""
       },
@@ -512,16 +545,6 @@
       "max-reorg-resequence-depth": 1024
     }
   },
-  "p2p": {
-    "bootnodes": [],
-    "bootnodes-v5": [],
-    "discovery-v4": false,
-    "discovery-v5": false,
-    "listen-addr": "",
-    "max-peers": 50,
-    "no-dial": true,
-    "no-discovery": true
-  },
   "parent-chain": {
     "blob-client": {
       "authorization": "",
@@ -537,16 +560,15 @@
       "retry-delay": "0s",
       "retry-errors": "",
       "timeout": "1m0s",
-      "url": "ws://3.38.138.216:8548",
+      "url": "wss://arbitrum-sepolia.nodit.io/t8S43yYVuujw0p-75EnhNhKp3SNzHHWr",
       "websocket-message-size-limit": 268435456
     },
-    "id": 412346,
-    "wallet": { "password": "", "private-key": "" }
+    "id": "421614"
   },
   "persistent": {
     "ancient": "",
-    "chain": "local",
-    "db-engine": "leveldb",
+    "chain": "itstg",
+    "db-engine": "",
     "global-config": ".arbitrum",
     "handles": 512,
     "log-dir": "",
@@ -574,7 +596,7 @@
         "wal-dir": "",
         "wal-min-sync-interval": 0
       },
-      "max-concurrent-compactions": 2
+      "max-concurrent-compactions": 4
     }
   },
   "pprof": false,
@@ -584,13 +606,17 @@
     "api-auth": true,
     "api-public": false,
     "arbitrator": {
-      "execution": { "cached-challenge-machines": 4, "initial-steps": "100000" },
+      "execution": { "cached-challenge-machines": "4", "initial-steps": "100000" },
       "execution-run-timeout": "15m0s",
       "output-path": "./target/output",
       "redis-validation-server-config": {
+        "buffer-reads": true,
         "consumer-config": { "keepalive-timeout": "5m0s", "response-entry-timeout": "1h0m0s" },
         "module-roots": [],
-        "stream-timeout": "10m0s"
+        "redis-url": "",
+        "stream-prefix": "",
+        "stream-timeout": "10m0s",
+        "workers": 0
       },
       "workers": 0
     },
@@ -607,10 +633,10 @@
   },
   "ws": {
     "addr": "0.0.0.0",
-    "api": ["net", "web3", "eth", "arb"],
+    "api": ["net", "web3", "eth", "arb", "debug"],
     "expose-all": false,
     "origins": [],
-    "port": 3448,
+    "port": 8548,
     "rpcprefix": ""
   }
 }

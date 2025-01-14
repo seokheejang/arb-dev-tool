@@ -25,7 +25,7 @@ async function main() {
     // const address = getAddressFromPrivkey(args1);
     // const address = getAddressFromString(args1);
     const key = generateMnemonicWallet();
-    // const key = getMultiplePrivateKeys(args1);
+    // const key = getMultiplePrivateKeys('dd dd');
 
     console.log('result:', key);
   } catch (error) {

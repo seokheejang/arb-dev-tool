@@ -84,8 +84,8 @@ describe('4_STORY', () => {
         `${ansi.BrightRed}테스트 주요 환경 설정 값${ansi.reset}\n` +
           `\t - L1 블록 생성 주기 : 1초\n` +
           `\t - L2 블록 생성 주기 : 1초\n` +
-          `\t - L2 RBlock 생성 주기 (minimumAssertionPeriod) : 50 L1 Block\n` +
-          `\t - L2 RBlock create → confirm 주기 (confirmPeriodBlocks) : 20 L1 Block\n` +
+          `\t - L2 RBlock 생성(create) 주기 : 50 (L1 Block)\n` +
+          `\t - L2 RBlock 생성(create) → 확인(confirm) 주기 : 20 (L1 Block)\n` +
           `\t - L3 배치 생성 주기 (max-delay) : 5초`,
       );
 

@@ -50,7 +50,6 @@ export const getMultiplePrivateKeys = (mnemonic: string, numberOfKeys: number = 
 
   const hdNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
   const keys: string[] = [];
-  ``;
 
   for (let i = 0; i < numberOfKeys; i++) {
     const childNode = hdNode.derivePath(`m/44'/60'/0'/0/${i}`);
@@ -58,6 +57,23 @@ export const getMultiplePrivateKeys = (mnemonic: string, numberOfKeys: number = 
   }
 
   return keys;
+};
+
+export const getMultipleAddress = (mnemonic: string, numberOfKeys: number = 10): string[] => {
+  if (!ethers.utils.isValidMnemonic(mnemonic)) {
+    throw new Error('Invalid mnemonic');
+  }
+
+  const hdNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+  const addresses: string[] = [];
+
+  for (let i = 0; i < numberOfKeys; i++) {
+    const childNode = hdNode.derivePath(`m/44'/60'/0'/0/${i}`);
+    const address = ethers.utils.computeAddress(childNode.privateKey);
+    addresses.push(address);
+  }
+
+  return addresses;
 };
 
 export const getAddressFromString = (name: string): string => {
