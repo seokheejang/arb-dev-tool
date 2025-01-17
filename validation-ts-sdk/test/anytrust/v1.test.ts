@@ -1,17 +1,4 @@
-import {
-  ENV,
-  HttpProvider,
-  TypeHttpProvider,
-  CustomWallet,
-  sleep,
-  TypeWsProvider,
-  WsProvider,
-  ansi,
-  parseCalldata,
-  parseRollupData,
-  extractFunctionSelectors,
-  printFunctionSelectors,
-} from '@src/index';
+import { parseCalldata, extractFunctionSelectors, printFunctionSelectors } from '@src/index';
 import * as SequencerInboxJSON from '@artifacts/contracts/bridge/SequencerInbox.sol/SequencerInbox.json';
 import { ethers } from 'ethers';
 import { Base64 } from 'js-base64';
@@ -33,7 +20,7 @@ describe('AnytrustTest', () => {
       printFunctionSelectors(selectors);
     });
   });
-  describe('parseCalldata', () => {
+  describe('get-by-hash', () => {
     it('1', async () => {
       const parsedL1CallData = await parseCalldata(rollupTxInput);
       console.log('parsedL1CallData:', parsedL1CallData);

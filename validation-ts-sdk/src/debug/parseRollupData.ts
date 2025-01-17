@@ -3,8 +3,11 @@ import { processRawData, decompressAndDecode, getAllL2Msgs, decodeL2Msgs } from 
 
 export const parseRollupData = async (data: string) => {
   let rawData = Uint8Array.from(Buffer.from(data, 'hex'));
-  const compressedData = processRawData(rawData);
-  const result = decompressAndDecode(compressedData);
+  console.log('parseRollupData | rawData:', rawData);
+  const compressedData = await processRawData(rawData);
+  console.log('parseRollupData | compressedData:', compressedData);
+  const result = await decompressAndDecode(compressedData);
+  console.log('parseRollupData | decompressAndDecode:', result);
 
   const afterDelayedMessagesRead = 12;
   const l2Msgs = await getAllL2Msgs(result, afterDelayedMessagesRead);

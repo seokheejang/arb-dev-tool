@@ -1,18 +1,8 @@
 import {
-  ENV,
-  HttpProvider,
-  TypeHttpProvider,
-  CustomWallet,
-  sleep,
-  TypeWsProvider,
-  WsProvider,
-  ansi,
   parseCalldata,
   parseRollupData,
   extractFunctionSelectors,
   printFunctionSelectors,
-  decodeL2Msgs,
-  getAllL2Msgs,
 } from '@src/index';
 import * as SequencerInboxJSON from '@artifacts/contracts/bridge/SequencerInbox.sol/SequencerInbox.json';
 import { ethers } from 'ethers';
@@ -66,29 +56,11 @@ describe('AnytrustTest', () => {
       console.log('base64', base64);
 
       const bufMessage = Buffer.from(base64Data.data, 'base64');
-      const parsedL2Msg = decodeL2Msgs(bufMessage);
-      const parsedAllL2Msg = await getAllL2Msgs([bufMessage], 12);
-      console.log('bufMessage', bufMessage);
-      console.log('parsedL2Msg', parsedL2Msg);
-      console.log('parsedAllL2Msg', parsedAllL2Msg);
-      let hexData = '';
-      parsedAllL2Msg.forEach(msg => {
-        hexData += Buffer.from(msg).toString('hex');
-      });
+      const hexbufMessageInput = bufMessage.toString('hex');
+      console.log('parseRollupData input data', hexbufMessageInput);
 
-      console.log('hexData:', hexData);
-
-      const decodedString = Buffer.from(`${hexData}`, 'hex').toString('utf8');
-      console.log('decodedString', decodedString);
-
-      const feedl2Msg = `BAL4dIINBQGEWWgvAIRlU/EAglIIlJQOPLTzeuAllJnnHzpVi13gRx+giIrHIwSJ6AAAgMABoHUPvh1szM2EFCpRFQp4w+XKuRSbBmtiiq49hwn9BGI1oCC1CdAiAMtAnc2nDjmURBWvOM0lmLBylruUSNVGfn3Q`;
-      // const feedl2MsgBase64 = Base64.toUint8Array(feedl2Msg);
-      const feedBufMessage = Buffer.from(feedl2Msg, 'base64');
-      console.log('feedBufMessage', feedBufMessage);
-      const feedParsedL2Msg = decodeL2Msgs(feedBufMessage);
-      console.log('feedParsedL2Msg', feedParsedL2Msg);
-      const feedParsedAllL2Msg = await getAllL2Msgs([feedBufMessage], 12);
-      console.log('feedParsedAllL2Msg', feedParsedAllL2Msg);
+      const parseData = await parseRollupData(hexbufMessageInput);
+      console.log('parseData', parseData);
 
       expect(1).toEqual(1);
     });

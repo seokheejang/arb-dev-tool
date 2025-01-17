@@ -21,14 +21,16 @@ export const L2MessageKind_Batch = 3;
 export const L2MessageKind_SignedTx = 4;
 export const delayedMsgToBeAdded = 9;
 
-export const decompressAndDecode = (compressedData: Uint8Array) => {
+export const decompressAndDecode = async (compressedData: Uint8Array) => {
   //decompress data
   const decompressedData = brotli.decompress(Buffer.from(compressedData));
-
+  console.log('decompressAndDecode | decompressedData:', decompressedData);
   const hexData = ethers.utils.hexlify(decompressedData);
+  console.log('decompressAndDecode | hexData:', hexData);
 
   //use rlp to decode stream type
   let res = rlp.decode(hexData, true) as Decoded;
+  console.log('decompressAndDecode | rlp.decode:', res);
 
   const l2Segments: Uint8Array[] = [];
   while (res.remainder !== undefined) {
@@ -38,7 +40,7 @@ export const decompressAndDecode = (compressedData: Uint8Array) => {
   return l2Segments;
 };
 
-export const processRawData = (rawData: Uint8Array): Uint8Array => {
+export const processRawData = async (rawData: Uint8Array): Promise<Uint8Array> => {
   // This is to make sure this message is Nitro Rollups type. (For example: Anytrust use 0x80 here)
   if (rawData[0] !== 0) {
     throw Error('Can only process brotli compressed data.');
